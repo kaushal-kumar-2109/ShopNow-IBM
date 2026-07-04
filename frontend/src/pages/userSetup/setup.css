@@ -1,0 +1,157 @@
+/*----------------------------------------
+  User Authentication Pages Styling (Male Fashion Theme)
+----------------------------------------*/
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 40px 15px;
+  background-color: #f3f2ee;
+}
+
+.auth-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 480px;
+  padding: 40px;
+  box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e1e1e1;
+  text-align: center;
+}
+
+.auth-card h3 {
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  color: #111111;
+  font-size: 24px;
+}
+
+.auth-card p {
+  font-size: 14px;
+  color: #888888;
+  margin-bottom: 30px;
+}
+
+.auth-form {
+  text-align: left;
+}
+
+.auth-group {
+  margin-bottom: 20px;
+}
+
+.auth-group label {
+  display: block;
+  font-weight: 700;
+  color: #111111;
+  font-size: 14px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.auth-group input {
+  width: 100%;
+  border: 1px solid #e1e1e1;
+  padding: 12px 15px;
+  font-size: 15px;
+  color: #111111;
+  transition: border-color 0.3s;
+}
+
+.auth-group input:focus {
+  border-color: #111111;
+}
+
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  font-size: 14px;
+}
+
+.auth-links a {
+  color: #e53637;
+  font-weight: 600;
+}
+
+.auth-links a:hover {
+  text-decoration: underline;
+}
+
+.auth-btn {
+  width: 100%;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 14px 0;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.auth-footer {
+  font-size: 14px;
+  color: #3d3d3d;
+}
+
+.auth-footer a {
+  color: #111111;
+  font-weight: 700;
+}
+
+.auth-footer a:hover {
+  color: #e53637;
+}
+
+/* Verification Code Grid Inputs */
+.otp-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.otp-input {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #e1e1e1;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111111;
+  transition: all 0.3s;
+}
+
+.otp-input:focus {
+  border-color: #e53637;
+  box-shadow: 0 0 5px rgba(229, 54, 55, 0.2);
+}
+
+.otp-timer {
+  font-size: 14px;
+  color: #e53637;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.otp-resend {
+  font-size: 14px;
+  color: #888888;
+  text-align: center;
+}
+
+.otp-resend button {
+  color: #111111;
+  font-weight: 700;
+  text-decoration: underline;
+  margin-left: 5px;
+}
+.otp-resend button:disabled {
+  color: #b7b7b7;
+  text-decoration: none;
+  cursor: not-allowed;
+}
