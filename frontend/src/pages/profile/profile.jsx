@@ -9,21 +9,25 @@ const ORDERS_KEY = "ShowNow_Orders";
 
 export default function Profile({ isUserLoged, setIsUserLoged }) {
 
-  const [getUser, setUser] = useState(false);
+  const [getUser, setUser] = useState({});
+  const navigate = useNavigate();
 
   const getUserRecord = async () => {
     const res = await getUserData();
-    console.log("user response => ", res);
+    setUser(res.data);
   }
 
   useEffect(() => {
     getUserRecord();
+    if (!isUserLoged) {
+      navigate("/");
+      return
+    }
   }, []);
 
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "overview";
   const [activeTab, setActiveTab] = useState(initialTab);
-  const navigate = useNavigate();
 
   // ── Address State ────────────────────────────────────────────────────────────
   const userKey = "guest";
@@ -141,10 +145,10 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
           <div className="profile-sidebar">
             <div className="profile-avatar-card">
               <div className="profile-big-avatar">
-                {"U"}
+                {(getUser.name) ? getUser.name[0] : "SN"}
               </div>
-              <h4>{"User"}</h4>
-              <p>{"email"}</p>
+              <h4>{getUser.name}</h4>
+              <p>{getUser.email}</p>
             </div>
 
             <ul className="profile-nav">
@@ -178,9 +182,9 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
 
                 <div className="info-grid">
                   {[
-                    { label: "Full Name", value: "name" },
-                    { label: "Email Address", value: "email" },
-                    { label: "Account Role", value: "USER" },
+                    { label: "Full Name", value: getUser.name },
+                    { label: "Email Address", value: getUser.email },
+                    { label: "Account Role", value: getUser.role },
                     // { label: "Session Start", value: currentUser?.loginDate ? new Date(currentUser.loginDate).toLocaleString() : "—" },
                   ].map((item, i) => (
                     <div key={i} className="info-box">
@@ -395,13 +399,13 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
                 <form onSubmit={handleSettingsSave} className="settings-form">
                   <div className="form-group">
                     <label>Email Address (cannot be changed)</label>
-                    <input type="email" value={""} disabled />
+                    <input type="email" value={getUser.email} disabled />
                   </div>
                   <div className="form-group">
                     <label>Display Name *</label>
                     <input
                       type="text"
-                      value={displayName}
+                      value={getUser.name}
                       onChange={e => setDisplayName(e.target.value)}
                       placeholder="Your full name"
                       required

@@ -57,7 +57,7 @@ const CreateUser = async (req, res) => {
         const response = await CreateUserToken(name, email, "USER");
         if (response.status) {
             // res.clearCookie('token');
-            res.cookie("token", response.token, {
+            res.cookie("jwtoken", response.token, {
                 httpOnly: true,
                 secure: (process.env.WEB === "local") ? false : true,
                 sameSite: (process.env.WEB === "local") ? "lax" : "strict",
@@ -89,13 +89,13 @@ const SetUser = async (req, res) => {
         const user = await User.findOne({ email });
         if (!user) return res.status(400).json({ tag: "email", message: "User not found" });
 
-        const isValide = bcrypt.compare(password, user.password);
+        const isValide = await bcrypt.compare(password, user.password);
         if (!isValide) return res.status(400).json({ tag: "password", message: "Password is not valid" });
 
         const response = await CreateUserToken(user.name, user.email, "USER");
         if (response.status) {
             // res.clearCookie('token');
-            res.cookie("token", response.token, {
+            res.cookie("jwtoken", response.token, {
                 httpOnly: true,
                 secure: (process.env.WEB === "local") ? false : true,
                 sameSite: (process.env.WEB === "local") ? "lax" : "strict",
