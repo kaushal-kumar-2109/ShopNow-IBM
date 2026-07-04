@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const getRouter = require("./src/router/get.router.js");
 const postRouter = require("./src/router/post.router.js");
+const putRouter = require("./src/router/put.router.js");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use("/ShopNow/api/get", getRouter);
 app.use("/ShopNow/api/post", postRouter);
+app.use("/ShopNow/api/put", putRouter);
 
 // Example route
 app.get("/ShopNow", (req, res) => {
