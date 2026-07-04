@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useShop } from "../context/ShopContext";
 import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 
-export default function Header() {
+export default function Header({ isUserLoged, setIsUserLoged }) {
   const {
     getCartCount,
     getCartTotal,
@@ -14,8 +15,10 @@ export default function Header() {
     setMobileMenuOpen
   } = useShop();
 
+  const navigate = useNavigate();
   const location = useLocation();
   const [pagesDropdownOpen, setPagesDropdownOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -36,6 +39,14 @@ export default function Header() {
     setMobileMenuOpen(false);
   };
 
+  const handleLogout = () => {
+    logoutUser();
+    setIsUserLoged(false);
+    setUserDropdownOpen(false);
+    toast.success("Logged out successfully. See you soon!");
+    navigate("/");
+  };
+
   return (
     <>
       <header className="header">
@@ -51,10 +62,99 @@ export default function Header() {
               <div className="col-lg-6 col-md-5">
                 <div className="header__top__right">
                   <div className="header__top__links">
-                    <Link to="/login">Sign in</Link>
-                    <a href="#">FAQs</a>
+                    {/* ===== USER AUTH SECTION ===== */}
+                    {isUserLoged ? (
+                      <div
+                        className="header__top__hover"
+                        style={{ position: "relative" }}
+                        onMouseEnter={() => setUserDropdownOpen(true)}
+                        onMouseLeave={() => setUserDropdownOpen(false)}
+                      >
+                        <span style={{
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "7px",
+                          color: "#ffffff",
+                          fontWeight: "600",
+                          fontSize: "14px"
+                        }}>
+                          {/* Avatar Circle */}
+                          <span style={{
+                            width: "26px",
+                            height: "26px",
+                            borderRadius: "50%",
+                            background: "#252424ff",
+                            color: "#fff",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "12px",
+                            fontWeight: "700",
+                            padding: "1px",
+                            flexShrink: 0
+                          }}><img src="../../public/userIcon.png" alt="user Icon" style={{ width: "80%", height: "80%" }} /></span>
+
+                          <i className="arrow_carrot-down" style={{ position: "static", marginLeft: "2px", fontSize: "12px" }}></i>
+                        </span>
+
+                        {/* Dropdown */}
+                        {userDropdownOpen && (
+                          <ul style={{
+                            position: "absolute",
+                            top: "100%",
+                            right: 0,
+                            width: "170px",
+                            background: "#fff",
+                            border: "1px solid #e1e1e1",
+                            borderRadius: "6px",
+                            boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+                            listStyle: "none",
+                            padding: "6px 0",
+                            margin: 0,
+                            zIndex: 9999
+                          }}>
+                            <li style={{ padding: "4px 0" }}>
+                              <Link
+                                to="/profile"
+                                style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 16px", color: "#333", fontSize: "13px", fontWeight: "600" }}
+                              >
+                                <i className="fa fa-user-o" style={{ color: "#e53637", width: "14px" }}></i>
+                                My Profile
+                              </Link>
+                            </li>
+                            <li style={{ padding: "4px 0" }}>
+                              <Link
+                                to="/profile?tab=orders"
+                                style={{ display: "flex", alignItems: "center", gap: "8px", padding: "9px 16px", color: "#333", fontSize: "13px", fontWeight: "600" }}
+                              >
+                                <i className="fa fa-shopping-bag" style={{ color: "#e53637", width: "14px" }}></i>
+                                My Orders
+                              </Link>
+                            </li>
+                            <li style={{ borderTop: "1px solid #f0f0f0", margin: "4px 0", padding: "4px 0" }}>
+                              <button
+                                onClick={handleLogout}
+                                style={{
+                                  display: "flex", alignItems: "center", gap: "8px",
+                                  padding: "9px 16px", color: "#e53637", fontSize: "13px",
+                                  fontWeight: "700", background: "none", border: "none",
+                                  cursor: "pointer", width: "100%", textAlign: "left"
+                                }}
+                              >
+                                <i className="fa fa-sign-out" style={{ width: "14px" }}></i>
+                                Logout
+                              </button>
+                            </li>
+                          </ul>
+                        )}
+                      </div>
+                    ) : (
+                      <Link to="/login">Sign in</Link>
+                    )}
+                    {/* <a href="#">FAQs</a> */}
                   </div>
-                  <div className="header__top__hover">
+                  <div className="header__top__hover" style={{ marginLeft: "25px" }}>
                     <span>Usd <i className="arrow_carrot-down"></i></span>
                     <ul>
                       <li>USD</li>
@@ -174,9 +274,35 @@ export default function Header() {
                 </Link>
               </div>
 
+              {/* Mobile User Info / Sign in */}
+              {isUserLoged ? (
+                <div style={{
+                  padding: "15px 20px",
+                  background: "#f9f9f9",
+                  borderRadius: "8px",
+                  margin: "0 0 20px 0",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px"
+                }}>
+                  <div style={{
+                    width: "40px", height: "40px", borderRadius: "50%",
+                    background: "#e53637", color: "#fff",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "18px", fontWeight: "700", flexShrink: 0
+                  }}></div>
+                  <div>
+                    <div style={{ fontWeight: "700", fontSize: "15px", color: "#111" }}>{currentUser?.name}</div>
+                    <div style={{ fontSize: "12px", color: "#777" }}>{currentUser?.email}</div>
+                  </div>
+                </div>
+              ) : null}
+
               <div className="offcanvas__option">
                 <div className="offcanvas__links">
-                  <Link to="/login" onClick={handleLinkClick}>Sign in</Link>
+                  {!isUserLoged && (
+                    <Link to="/login" onClick={handleLinkClick}>Sign in</Link>
+                  )}
                   <a href="#">FAQs</a>
                 </div>
                 <div className="offcanvas__top__hover">
@@ -253,6 +379,34 @@ export default function Header() {
                       </li>
                     );
                   })}
+
+                  {/* Mobile auth links */}
+                  {isUserLoged && (
+                    <>
+                      <li style={{ borderTop: "1px solid #eee", marginTop: "10px", paddingTop: "10px" }}>
+                        <Link to="/profile" onClick={handleLinkClick}>
+                          <i className="fa fa-user-o" style={{ marginRight: "8px", color: "#e53637" }}></i>
+                          My Profile
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/profile?tab=orders" onClick={handleLinkClick}>
+                          <i className="fa fa-shopping-bag" style={{ marginRight: "8px", color: "#e53637" }}></i>
+                          My Orders
+                        </Link>
+                      </li>
+                      <li>
+                        <a
+                          href="#"
+                          onClick={(e) => { e.preventDefault(); handleLogout(); }}
+                          style={{ color: "#e53637", fontWeight: "700" }}
+                        >
+                          <i className="fa fa-sign-out" style={{ marginRight: "8px" }}></i>
+                          Logout
+                        </a>
+                      </li>
+                    </>
+                  )}
                 </ul>
               </nav>
 

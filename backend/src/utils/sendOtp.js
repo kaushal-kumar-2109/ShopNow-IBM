@@ -91,7 +91,6 @@ const SendOTP = async (email, otp, tag = "signup") => {
     const mailOptions = createMailOptions(email, otp, tag);
     try {
         const info = await transporter.sendMail(mailOptions);
-        console.log();
         return ({ status: true, message: 'Email sent successfully!', info: info.messageId });
     } catch (error) {
         console.error('Error sending email:', error);

@@ -5,7 +5,7 @@ import { useShop } from "../../context/ShopContext";
 import { motion } from "framer-motion";
 import Loader from "../../components/Loader";
 
-export default function ShopDetails() {
+export default function ShopDetails({ isUserLoged, setIsUserLoged }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, toggleWishlist, wishlist, comments, addComment } = useShop();
@@ -304,10 +304,10 @@ export default function ShopDetails() {
               </div>
 
               {/* Add Comment Form */}
-              <div 
-                style={{ 
-                  border: "1px solid #e1e1e1", 
-                  padding: "25px", 
+              <div
+                style={{
+                  border: "1px solid #e1e1e1",
+                  padding: "25px",
                   borderRadius: "4px",
                   backgroundColor: "#fcfcfc"
                 }}
@@ -315,8 +315,8 @@ export default function ShopDetails() {
                 <h5 style={{ fontWeight: "700", marginBottom: "15px" }}>Leave A Comment</h5>
                 <form onSubmit={handlePostComment}>
                   <div style={{ marginBottom: "15px" }}>
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       placeholder="Your Name"
                       value={userName}
                       onChange={(e) => setUserName(e.target.value)}
@@ -333,7 +333,7 @@ export default function ShopDetails() {
                     />
                   </div>
                   <div style={{ marginBottom: "20px" }}>
-                    <textarea 
+                    <textarea
                       placeholder="Your Comment"
                       rows="4"
                       value={commentText}

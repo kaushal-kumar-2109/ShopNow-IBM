@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 
 const User = require("../../db/models/user.model.js");
 const Otp = require("../../db/models/otp.model.js");
+const Token = require("../../db/models/token.model.js");
 const SendOTP = require("../utils/sendOtp.js");
 const CreateUserToken = require("../utils/createToken.js");
 
@@ -24,9 +25,10 @@ const SendOtp = async (req, res) => {
 
         await Otp.create({ otp, email });
         const response = await SendOTP(email, otp, tag);
-        if (response.status) return res.status(200).json({ message: "OTP sent successfully" });
+        if (response.status === true) return res.status(200).json({ message: "OTP sent successfully" });
         return res.status(500).json({ message: "Failed to send OTP", error: response.info });
     } catch (err) {
+        console.log("There is an server error => ", err);
         return res.status(500).json({ message: "Internal server error", error: err })
     }
 }
@@ -54,12 +56,15 @@ const CreateUser = async (req, res) => {
 
         const response = await CreateUserToken(name, email, "USER");
         if (response.status) {
-            res.cookie("jwtoken", response.token, {
+            // res.clearCookie('token');
+            res.cookie("token", response.token, {
                 httpOnly: true,
                 secure: (process.env.WEB === "local") ? false : true,
                 sameSite: (process.env.WEB === "local") ? "lax" : "strict",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
+            const oldToken = await Token.findOne({ email });
+            if (oldToken) await Token.deleteOne({ email });
             await Token.create({
                 token: response.token,
                 email: email
@@ -69,6 +74,7 @@ const CreateUser = async (req, res) => {
             return res.status(401).json({ tag: "token", message: "Token is not created" });
         }
     } catch (err) {
+        console.log("There is an server error => ", err);
         return res.status(500).json({ message: "Internal server error", error: err });
     }
 }
@@ -88,12 +94,17 @@ const SetUser = async (req, res) => {
 
         const response = await CreateUserToken(user.name, user.email, "USER");
         if (response.status) {
-            res.cookie("jwtoken", response.token, {
+            // res.clearCookie('token');
+            res.cookie("token", response.token, {
                 httpOnly: true,
                 secure: (process.env.WEB === "local") ? false : true,
                 sameSite: (process.env.WEB === "local") ? "lax" : "strict",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
+
+            const oldToken = await Token.findOne({ email });
+            if (oldToken) await Token.deleteOne({ email });
+
             await Token.create({
                 token: response.token,
                 email: email
@@ -103,6 +114,7 @@ const SetUser = async (req, res) => {
             return res.status(401).json({ tag: "token", message: "Token is not created" });
         }
     } catch (err) {
+        console.log("There is an server error => ", err);
         return res.status(500).json({ message: "Internal server error", error: err });
     }
 }
@@ -128,8 +140,23 @@ const UpdateUserPassword = async (req, res) => {
         await Otp.deleteOne({ email });
         return res.status(200).json({ message: "Password updated successfully" });
     } catch (err) {
+        console.log("There is an server error => ", err);
         return res.status(500).json({ message: "Internal server error", error: err });
     }
 }
 
-module.exports = { SendOtp, CreateUser, SetUser, UpdateUserPassword };
+const GetUserData = async (req, res) => {
+    try {
+        const email = req.email;
+
+        const userData = await User.findOne({ email });
+        if (!userData) return res.status(400).json({ tag: "user", message: "User not found" });
+
+        return res.status(200).json({ message: "User data fetched successfully", data: userData });
+    } catch (err) {
+        console.log("There is an server error => ", err);
+        return res.status(500).json({ message: "Internal server error", error: err });
+    }
+}
+
+module.exports = { SendOtp, CreateUser, SetUser, UpdateUserPassword, GetUserData };

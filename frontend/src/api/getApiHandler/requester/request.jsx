@@ -1,18 +1,22 @@
 const GetDataCall = async (url) => {
     try {
-        const response = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+        const response = await fetch(url, {
+            method: 'GET',
+            credentials: "include",
+            headers: { 'Content-Type': 'application/json' }
+        });
         const data = await response.json();
         if (response.status == 200) {
             return {
                 flag: true,
-                message: "Data fetched successfully",
-                data: data
+                message: data.message,
+                data: data.data
             };
         } else {
             return {
                 flag: false,
-                message: "Faild to fetch data",
-                error: data
+                message: data.message,
+                error: data.data
             };
         }
     } catch (err) {

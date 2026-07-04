@@ -44,7 +44,7 @@ export default function ForgotPassword() {
 
     // Simulate OTP alert
     alert(`[Shop Now Recovery] Verification code sent to: ${email}.\n\nYour 4-Digit OTP is: ${mockOtp}`);
-    
+
     // Swap state
     setStep("reset");
   };

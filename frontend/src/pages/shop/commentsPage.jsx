@@ -5,7 +5,7 @@ import { useShop } from "../../context/ShopContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "../../components/Loader";
 
-export default function CommentsPage() {
+export default function CommentsPage({ isUserLoged, setIsUserLoged }) {
   const { id } = useParams();
   const productId = parseInt(id);
   const { comments, addComment } = useShop();
@@ -77,10 +77,10 @@ export default function CommentsPage() {
           <div className="row">
             {/* Left Column: Product Summary Card */}
             <div className="col-lg-4 col-md-5">
-              <div 
-                style={{ 
-                  border: "1px solid #e1e1e1", 
-                  padding: "25px", 
+              <div
+                style={{
+                  border: "1px solid #e1e1e1",
+                  padding: "25px",
                   borderRadius: "4px",
                   position: "sticky",
                   top: "30px",
@@ -89,9 +89,9 @@ export default function CommentsPage() {
                 }}
               >
                 <div style={{ textAlign: "center", marginBottom: "20px" }}>
-                  <img 
-                    src={product.mainImage} 
-                    alt={product.name} 
+                  <img
+                    src={product.mainImage}
+                    alt={product.name}
                     style={{ maxWidth: "180px", height: "auto", borderRadius: "4px" }}
                   />
                 </div>
@@ -169,10 +169,10 @@ export default function CommentsPage() {
                 </div>
 
                 {/* Form to post a review */}
-                <div 
-                  style={{ 
-                    border: "1px solid #e1e1e1", 
-                    padding: "30px", 
+                <div
+                  style={{
+                    border: "1px solid #e1e1e1",
+                    padding: "30px",
                     borderRadius: "4px",
                     backgroundColor: "#fcfcfc"
                   }}
@@ -183,8 +183,8 @@ export default function CommentsPage() {
                       <label style={{ display: "block", fontWeight: "600", fontSize: "14px", marginBottom: "8px" }}>
                         Your Name
                       </label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         placeholder="Enter your name"
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
@@ -204,7 +204,7 @@ export default function CommentsPage() {
                       <label style={{ display: "block", fontWeight: "600", fontSize: "14px", marginBottom: "8px" }}>
                         Your Review/Comment
                       </label>
-                      <textarea 
+                      <textarea
                         placeholder="Share your thoughts about this product..."
                         rows="5"
                         value={commentText}

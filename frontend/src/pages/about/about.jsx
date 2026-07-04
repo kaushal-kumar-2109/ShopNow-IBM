@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Loader from "../../components/Loader";
 
-export default function About() {
+export default function About({ isUserLoged, setIsUserLoged }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -4,7 +4,7 @@ import { useShop } from "../../context/ShopContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "../../components/Loader";
 
-export default function ShoppingCart() {
+export default function ShoppingCart({ isUserLoged, setIsUserLoged }) {
   const { cart, updateCartQuantity, removeFromCart, getCartTotal } = useShop();
   const [loading, setLoading] = useState(true);
 

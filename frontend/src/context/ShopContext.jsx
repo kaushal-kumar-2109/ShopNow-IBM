@@ -19,7 +19,7 @@ export const ShopProvider = ({ children }) => {
 
     const initialComments = [];
     const reviewers = [
-      "Aarav Sharma", "Priya Verma", "Vikash Kumar", "Diya Jain", 
+      "Aarav Sharma", "Priya Verma", "Vikash Kumar", "Diya Jain",
       "Sean Robbins", "Lucy Myers", "Christine Wise", "John Doe"
     ];
     const reviewTexts = [

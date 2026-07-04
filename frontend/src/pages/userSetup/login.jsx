@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import Loader from "../../components/Loader";
+import { setUser } from "../../api/postApiHandler/pstData";
 import "./setup.css";
 
-export default function Login() {
+export default function Login({ setIsUserLoged }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
@@ -14,15 +17,32 @@ export default function Login() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
-      alert("Please fill in all fields.");
+      toast.error("Please fill in all fields.");
       return;
     }
-    // Perform simulated login validation
-    alert(`Welcome back! Logged in successfully as: ${email}`);
-    navigate("/");
+
+    setSubmitting(true);
+    const toastId = toast.loading("Signing you in...");
+
+    try {
+      const res = await setUser({ email, password });
+      if (res.flag == false) {
+        toast.error(res.data.message);
+        return;
+      }
+
+      toast.success(res.data.message);
+      localStorage.setItem("ShopNowUserData", JSON.stringify({ email: email, token: res.data.token, loginDate: Date.now(), expiresDate: Date.now() + (7 * 24 * 60 * 60 * 1000) }));
+      setIsUserLoged(true);
+      navigate("/");
+    } catch {
+      toast.error("Network error. Please try again.", { id: toastId });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -34,7 +54,7 @@ export default function Login() {
       <div className="auth-card">
         <h3>Sign In</h3>
         <p style={{ marginBottom: "20px" }}>Enter your credentials to access your user account</p>
-        
+
         <form onSubmit={handleLoginSubmit} className="auth-form">
           <div className="auth-group">
             <label htmlFor="email">Email Address</label>
@@ -68,13 +88,13 @@ export default function Login() {
             <Link to="/recover-password">Forgot Password?</Link>
           </div>
 
-          <button type="submit" className="site-btn auth-btn">
-            Sign In
+          <button type="submit" className="site-btn auth-btn" disabled={submitting}>
+            {submitting ? "Signing In..." : "Sign In"}
           </button>
         </form>
 
         <div className="auth-footer">
-          Don't have an account? <Link to="/signup">Create one</Link>
+          Don&apos;t have an account? <Link to="/signup">Create one</Link>
         </div>
       </div>
     </div>

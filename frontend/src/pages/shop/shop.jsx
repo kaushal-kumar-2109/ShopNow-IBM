@@ -5,7 +5,7 @@ import { useShop } from "../../context/ShopContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "../../components/Loader";
 
-export default function Shop() {
+export default function Shop({ isUserLoged, setIsUserLoged }) {
   const { addToCart, toggleWishlist, wishlist } = useShop();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -369,9 +369,8 @@ export default function Shop() {
                                 {[...Array(5)].map((_, rIdx) => (
                                   <i
                                     key={rIdx}
-                                    className={`fa ${
-                                      rIdx < product.rating ? "fa-star" : "fa-star-o"
-                                    }`}
+                                    className={`fa ${rIdx < product.rating ? "fa-star" : "fa-star-o"
+                                      }`}
                                   />
                                 ))}
                               </div>

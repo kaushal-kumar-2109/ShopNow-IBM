@@ -4,7 +4,7 @@ import { useShop } from "../../context/ShopContext";
 import { motion } from "framer-motion";
 import Loader from "../../components/Loader";
 
-export default function CheckOut() {
+export default function CheckOut({ isUserLoged, setIsUserLoged }) {
   const { cart, getCartTotal, clearCart } = useShop();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);

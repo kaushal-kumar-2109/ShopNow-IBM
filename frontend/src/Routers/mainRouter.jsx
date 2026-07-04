@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import LandingPage from "../pages/landing/LandingPage";
 import About from "../pages/about/about";
@@ -10,12 +11,12 @@ import ShoppingCart from "../pages/shop/shoppingCart";
 import NotFound from "../pages/404/notFound";
 import CommentsPage from "../pages/shop/commentsPage";
 
-// User authentication pages
+// User authentication + profile pages
 import Login from "../pages/userSetup/login";
 import Signup from "../pages/userSetup/signup";
 import ForgotPassword from "../pages/userSetup/forgotPassword";
-import { useEffect, useState } from "react";
-import { CheckUserData } from "../utils/checkUser";
+import Profile from "../pages/profile/profile";
+
 
 // Shared page transition wrapper
 export const PageTransition = ({ children }) => {
@@ -31,38 +32,30 @@ export const PageTransition = ({ children }) => {
   );
 };
 
-const MainRouter = () => {
-  const [isUserLoged, setIsUserLoged] = useState(false);
-
-  const setUser = async () => {
-    const check = await CheckUserData();
-    if (check.status) {
-      setIsUserLoged(true);
-    }
-  }
-
-  useEffect(() => {
-    setUser();
-  }, []);
+const MainRouter = ({ isUserLoged, setIsUserLoged }) => {
 
   return (
     <Routes>
-      <Route path="/" element={<PageTransition><LandingPage /></PageTransition>} />
-      <Route path="/about" element={<PageTransition><About /></PageTransition>} />
-      <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
-      <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
-      <Route path="/shop/:id" element={<PageTransition><ShopDetails /></PageTransition>} />
-      <Route path="/checkout" element={<PageTransition><CheckOut /></PageTransition>} />
-      <Route path="/shopping-cart" element={<PageTransition><ShoppingCart /></PageTransition>} />
-      <Route path="/shop/:id/comments" element={<PageTransition><CommentsPage /></PageTransition>} />
+      {/* Public routes */}
+      <Route path="/" element={<PageTransition><LandingPage isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
+      <Route path="/home" element={<PageTransition><LandingPage isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
+      <Route path="/about" element={<PageTransition><About isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
+      <Route path="/contact" element={<PageTransition><Contact isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
+      <Route path="/shop" element={<PageTransition><Shop isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
+      <Route path="/shop/:id" element={<PageTransition><ShopDetails isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
+      <Route path="/checkout" element={<PageTransition><CheckOut isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
+      <Route path="/shopping-cart" element={<PageTransition><ShoppingCart isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
+      <Route path="/shop/:id/comments" element={<PageTransition><CommentsPage isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
 
-      {/* User authentication routes */}
-      <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
-      <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
+      {/* Auth routes — redirect to home if already logged in */}
+      <Route path="/login" element={<PageTransition><Login setIsUserLoged={setIsUserLoged} /></PageTransition>} />
+      <Route path="/signup" element={<PageTransition><Signup setIsUserLoged={setIsUserLoged} /></PageTransition>} />
       <Route path="/recover-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+      {/* Protected route — redirect to login if not logged in */}
+      <Route path="/profile" element={<PageTransition><Profile isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
 
-      {/* Fallback to NotFound page */}
-      <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+      {/* Fallback */}
+      <Route path="*" element={<PageTransition><NotFound isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
     </Routes>
   );
 };

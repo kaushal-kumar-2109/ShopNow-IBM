@@ -1,132 +1,181 @@
-import { useState, useEffect, useRef } from "react";
+
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+
 import Loader from "../../components/Loader";
+import { sendOtp, createUser } from "../../api/postApiHandler/pstData";
+
 import "./setup.css";
 
-export default function Signup() {
+export default function Signup({ setIsUserLoged }) {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  const [pageLoading, setPageLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  // Registration Form States
+  const [step, setStep] = useState("register");
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
-  // State Manager: 'register' | 'otp'
-  const [step, setStep] = useState("register");
+  const [otp, setOtp] = useState("");
 
-  // OTP Validation States
-  const [generatedOtp, setGeneratedOtp] = useState("");
-  const [otpDigits, setOtpDigits] = useState(["", "", "", ""]);
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
 
-  // References for OTP input focus auto-shifting
-  const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
-
-  // Form input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Step 1: Submit Registration -> Send Mock OTP
-  const handleRegisterSubmit = (e) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match.");
-      return;
-    }
-
-    // Generate random 4-digit OTP
-    const mockOtp = Math.floor(1000 + Math.random() * 9000).toString();
-    setGeneratedOtp(mockOtp);
-    setTimer(60);
-    setCanResend(false);
-
-    console.log("MOCK_OTP: " + mockOtp);
-
-    // Simulate OTP email trigger
-    alert(`[Shop Now Verification] A secure OTP has been sent to ${formData.email}.\n\nYour 4-Digit OTP is: ${mockOtp}`);
-    
-    // Switch state to OTP enter
-    setStep("otp");
-  };
-
-  // Countdown timer effect for OTP expiration
   useEffect(() => {
-    if (step !== "otp" || timer === 0) {
-      if (timer === 0) setCanResend(true);
+    const timeout = setTimeout(() => {
+      setPageLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    if (step !== "otp") return;
+
+    if (timer <= 0) {
+      setCanResend(true);
       return;
     }
-    const countdown = setInterval(() => {
-      setTimer((t) => t - 1);
+
+    const interval = setInterval(() => {
+      setTimer((prev) => prev - 1);
     }, 1000);
-    return () => clearInterval(countdown);
+
+    return () => clearInterval(interval);
   }, [step, timer]);
 
-  // Resend OTP
-  const handleResendOtp = () => {
-    const newOtp = Math.floor(1000 + Math.random() * 9000).toString();
-    setGeneratedOtp(newOtp);
-    setOtpDigits(["", "", "", ""]);
-    setTimer(60);
-    setCanResend(false);
-    console.log("MOCK_OTP: " + newOtp);
-    alert(`[Shop Now Verification] New OTP sent!\n\nYour 4-Digit OTP is: ${newOtp}`);
-    if (inputRefs[0].current) {
-      inputRefs[0].current.focus();
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  // OTP inputs keyboard shifting
-  const handleOtpDigitChange = (index, value) => {
-    // Only accept numbers
-    if (value && isNaN(value)) return;
-
-    const newDigits = [...otpDigits];
-    newDigits[index] = value.slice(-1); // Only keep last digit
-    setOtpDigits(newDigits);
-
-    // Auto-focus next input
-    if (value && index < 3 && inputRefs[index + 1].current) {
-      inputRefs[index + 1].current.focus();
-    }
-  };
-
-  const handleKeyDown = (index, e) => {
-    // Shifting focus back on Backspace
-    if (e.key === "Backspace" && !otpDigits[index] && index > 0 && inputRefs[index - 1].current) {
-      inputRefs[index - 1].current.focus();
-    }
-  };
-
-  // Verify OTP
-  const handleVerifyOtp = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    const enteredOtp = otpDigits.join("");
-    if (enteredOtp.length < 4) {
-      alert("Please enter the full 4-digit verification code.");
-      return;
+
+    if (!formData.name) {
+      return toast.error("Name is required");
     }
 
-    if (enteredOtp === generatedOtp) {
-      alert("Email verified successfully! Your account is active.");
-      navigate("/login");
-    } else {
-      alert("Invalid verification code. Please check the code and try again.");
+    if (!formData.email.trim()) {
+      return toast.error("Email is required");
+    }
+
+    if (formData.password.length < 6) {
+      return toast.error("Password must be at least 6 characters");
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      return toast.error("Passwords do not match");
+    }
+
+    try {
+      setLoading(true);
+      const res = await sendOtp({
+        email: formData.email,
+        tag: "signup",
+      });
+
+      if (res.flag == false) {
+        toast.error(res.data.message);
+        return;
+      }
+
+      toast.success(res.data.message);
+
+      setStep("otp");
+      setOtp("");
+      setTimer(60);
+      setCanResend(false);
+    } catch (error) {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
+  const handleVerify = async (e) => {
+    e.preventDefault();
+
+    if (otp.length !== 4) {
+      return toast.error("Enter a valid 4-digit OTP");
+    }
+    if (!formData.name) {
+      return toast.error("Name is required");
+    }
+    if (!formData.email.trim()) {
+      return toast.error("Email is required");
+    }
+    if (formData.password.length < 6) {
+      return toast.error("Password must be at least 6 characters");
+    }
+    if (formData.password !== formData.confirmPassword) {
+      return toast.error("Passwords do not match");
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await createUser({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        otp,
+      });
+      if (res.flag == false) {
+        toast.error(res.data.message);
+        return;
+      }
+
+      toast.success(res.data.message);
+      localStorage.setItem("ShopNowUserData", JSON.stringify({ name: formData.name, email: formData.email, token: res.data.token, loginDate: Date.now(), expiresDate: Date.now() + (7 * 24 * 60 * 60 * 1000) }));
+      localStorage.setItem("ShopNowUserToken", res.data.token);
+      setIsUserLoged(true);
+      navigate("/");
+    } catch (error) {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      setLoading(true);
+
+      const res = await sendOtp({
+        email: formData.email,
+        tag: "signup",
+      });
+
+      if (!res.flag) {
+        toast.error(res.data?.message || "Unable to resend OTP");
+        return;
+      }
+
+      toast.success("OTP resent successfully");
+
+      setOtp("");
+      setTimer(60);
+      setCanResend(false);
+    } catch (error) {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (pageLoading) {
     return <Loader />;
   }
 
@@ -134,116 +183,126 @@ export default function Signup() {
     <div className="auth-container">
       <div className="auth-card">
         <h3>Create Account</h3>
+
         <p style={{ marginBottom: "20px" }}>
           {step === "register"
-            ? "Sign up to start tracking orders and customizing sizes"
-            : `Please enter the verification code sent to ${formData.email}`}
+            ? "Create your account to continue shopping."
+            : `Enter the OTP sent to ${formData.email}`}
         </p>
 
         {step === "register" ? (
-          // STEP 1 FORM: Registration Input Fields
-          <form onSubmit={handleRegisterSubmit} className="auth-form">
+          <form className="auth-form" onSubmit={handleRegister}>
             <div className="auth-group">
-              <label htmlFor="name">Full Name</label>
+              <label>Full Name</label>
+
               <input
                 type="text"
-                id="name"
                 name="name"
-                placeholder="e.g. John Doe"
+                placeholder="John Doe"
                 value={formData.name}
-                onChange={handleInputChange}
+                onChange={handleChange}
                 required
               />
             </div>
 
             <div className="auth-group">
-              <label htmlFor="email">Email Address</label>
+              <label>Email</label>
+
               <input
                 type="email"
-                id="email"
                 name="email"
-                placeholder="e.g. john.doe@example.com"
+                placeholder="john@example.com"
                 value={formData.email}
-                onChange={handleInputChange}
+                onChange={handleChange}
                 required
               />
             </div>
 
             <div className="auth-group">
-              <label htmlFor="password">Password</label>
+              <label>Password</label>
+
               <input
                 type="password"
-                id="password"
                 name="password"
-                placeholder="••••••••"
+                placeholder="********"
                 value={formData.password}
-                onChange={handleInputChange}
+                onChange={handleChange}
                 required
               />
             </div>
 
             <div className="auth-group">
-              <label htmlFor="confirmPassword">Confirm Password</label>
+              <label>Confirm Password</label>
+
               <input
                 type="password"
-                id="confirmPassword"
                 name="confirmPassword"
-                placeholder="••••••••"
+                placeholder="********"
                 value={formData.confirmPassword}
-                onChange={handleInputChange}
+                onChange={handleChange}
                 required
               />
             </div>
 
-            <button type="submit" className="site-btn auth-btn">
-              Register
+            <button
+              className="site-btn auth-btn"
+              disabled={loading}
+              type="submit"
+            >
+              {loading ? "Sending OTP..." : "Register"}
             </button>
           </form>
         ) : (
-          // STEP 2 FORM: OTP Verification Box
-          <form onSubmit={handleVerifyOtp} className="auth-form">
-            <div className="otp-grid">
-              {otpDigits.map((digit, idx) => (
-                <input
-                  key={idx}
-                  ref={inputRefs[idx]}
-                  type="text"
-                  maxLength="1"
-                  className="otp-input"
-                  value={digit}
-                  onChange={(e) => handleOtpDigitChange(idx, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(idx, e)}
-                  autoFocus={idx === 0}
-                  required
-                />
-              ))}
+          <form className="auth-form" onSubmit={handleVerify}>
+            <div className="auth-group">
+              <label>Enter OTP</label>
+
+              <input
+                type="text"
+                placeholder="Enter 4 digit OTP"
+                value={otp}
+                maxLength={4}
+                onChange={(e) =>
+                  setOtp(e.target.value.replace(/\D/g, ""))
+                }
+                required
+              />
             </div>
 
             {timer > 0 ? (
-              <div className="otp-timer">OTP expires in {timer}s</div>
+              <p style={{ marginBottom: "15px" }}>
+                OTP expires in {timer}s
+              </p>
             ) : (
-              <div className="otp-timer" style={{ color: "#888" }}>OTP has expired.</div>
+              <p style={{ marginBottom: "15px", color: "red" }}>
+                OTP Expired
+              </p>
             )}
 
-            <button type="submit" className="site-btn auth-btn">
-              Verify OTP
+            <button
+              className="site-btn auth-btn"
+              disabled={loading}
+              type="submit"
+            >
+              {loading ? "Verifying..." : "Verify OTP"}
             </button>
 
-            <div className="otp-resend">
-              Didn't receive the code?
+            <div className="otp-resend" style={{ marginTop: "20px" }}>
+              Didn't receive the code?{" "}
+
               <button
                 type="button"
-                disabled={!canResend}
                 onClick={handleResendOtp}
+                disabled={!canResend || loading}
               >
-                Resend Code
+                Resend OTP
               </button>
             </div>
           </form>
         )}
 
         <div className="auth-footer" style={{ marginTop: "20px" }}>
-          Already have an account? <Link to="/login">Sign In</Link>
+          Already have an account? <Link to="/login">Login</Link>
         </div>
       </div>
     </div>

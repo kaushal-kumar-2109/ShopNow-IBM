@@ -5,7 +5,7 @@ import { useShop } from "../../context/ShopContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "../../components/Loader";
 
-export default function LandingPage() {
+export default function LandingPage({ isUserLoged, setIsUserLoged }) {
   const { addToCart, toggleWishlist, wishlist } = useShop();
   const [loading, setLoading] = useState(true);
 
@@ -155,13 +155,12 @@ export default function LandingPage() {
             {PROMO_BANNERS.map((banner, idx) => (
               <div key={banner.id} className={banner.cols}>
                 <motion.div
-                  className={`banner__item ${
-                    idx === 1
-                      ? "banner__item--middle"
-                      : idx === 2
+                  className={`banner__item ${idx === 1
+                    ? "banner__item--middle"
+                    : idx === 2
                       ? "banner__item--last"
                       : ""
-                  }`}
+                    }`}
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -285,9 +284,8 @@ export default function LandingPage() {
                           {[...Array(5)].map((_, rIdx) => (
                             <i
                               key={rIdx}
-                              className={`fa ${
-                                rIdx < product.rating ? "fa-star" : "fa-star-o"
-                              }`}
+                              className={`fa ${rIdx < product.rating ? "fa-star" : "fa-star-o"
+                                }`}
                             />
                           ))}
                         </div>

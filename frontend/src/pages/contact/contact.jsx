@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Loader from "../../components/Loader";
 
-export default function Contact() {
+export default function Contact({ isUserLoged, setIsUserLoged }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

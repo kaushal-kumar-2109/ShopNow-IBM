@@ -1,8 +1,6 @@
 const jwt = require("jsonwebtoken");
 
 const CreateUserToken = async (name, email, role = "USER") => {
-
-    // The payload (data you want to securely store in the token)
     const userPayload = {
         role: role,
         name: name,
@@ -14,6 +12,7 @@ const CreateUserToken = async (name, email, role = "USER") => {
         const token = jwt.sign(userPayload, secretKey, { expiresIn: '7d' });
         return ({ status: true, message: "Token created successfully ", token: token });
     } catch (err) {
+        console.log("Error in creating Token => ", err);
         return ({ status: false, message: "Error in creating token ", error: err });
     }
 }
