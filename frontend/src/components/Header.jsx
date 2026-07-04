@@ -75,7 +75,7 @@ export default function Header() {
             <div className="col-lg-3 col-md-3">
               <div className="header__logo">
                 <Link to="/">
-                  <img src="/img/logo.png" alt="Male Fashion Logo" />
+                  <img src="/img/logo.png" alt="Shop Now Logo" />
                 </Link>
               </div>
             </div>

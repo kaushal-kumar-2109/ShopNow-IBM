@@ -13,6 +13,44 @@ export const ShopProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [comments, setComments] = useState(() => {
+    const saved = localStorage.getItem("comments");
+    if (saved) return JSON.parse(saved);
+
+    const initialComments = [];
+    const reviewers = [
+      "Aarav Sharma", "Priya Verma", "Vikash Kumar", "Diya Jain", 
+      "Sean Robbins", "Lucy Myers", "Christine Wise", "John Doe"
+    ];
+    const reviewTexts = [
+      "The fit is absolutely perfect! Highly recommended.",
+      "Amazing fabric quality and very premium look.",
+      "The packaging was neat and delivery was super fast.",
+      "Very comfortable and looks exactly like the images.",
+      "Great value for money. Buying another color soon!",
+      "The material is incredibly soft. Worth every penny.",
+      "Very stylish and breathable. Perfect for daily wear.",
+      "Exceeded my expectations! Best buy of the season."
+    ];
+
+    for (let productId = 1; productId <= 20; productId++) {
+      for (let i = 0; i < 6; i++) {
+        const reviewer = reviewers[(productId + i) % reviewers.length];
+        const text = reviewTexts[(productId * 3 + i * 2) % reviewTexts.length];
+        const date = new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toLocaleDateString();
+
+        initialComments.push({
+          id: `${productId}-${i}`,
+          productId,
+          userName: reviewer,
+          comment: text,
+          date
+        });
+      }
+    }
+    return initialComments;
+  });
+
   const [searchOpen, setSearchOpen] = useState(false);
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,6 +63,21 @@ export const ShopProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem("wishlist", JSON.stringify(wishlist));
   }, [wishlist]);
+
+  useEffect(() => {
+    localStorage.setItem("comments", JSON.stringify(comments));
+  }, [comments]);
+
+  const addComment = (productId, userName, text) => {
+    const newComment = {
+      id: Date.now().toString(),
+      productId: parseInt(productId),
+      userName,
+      comment: text,
+      date: new Date().toLocaleDateString()
+    };
+    setComments((prev) => [newComment, ...prev]);
+  };
 
   const addToCart = (product, size = "M", color = "", quantity = 1) => {
     // Pick default color if none provided
@@ -118,7 +171,9 @@ export const ShopProvider = ({ children }) => {
         toggleWishlist,
         clearCart,
         getCartCount,
-        getCartTotal
+        getCartTotal,
+        comments,
+        addComment
       }}
     >
       {children}

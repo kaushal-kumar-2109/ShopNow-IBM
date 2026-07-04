@@ -8,11 +8,14 @@ import ShopDetails from "../pages/shop/shopDetails";
 import CheckOut from "../pages/checkout/checkOut";
 import ShoppingCart from "../pages/shop/shoppingCart";
 import NotFound from "../pages/404/notFound";
+import CommentsPage from "../pages/shop/commentsPage";
 
 // User authentication pages
 import Login from "../pages/userSetup/login";
 import Signup from "../pages/userSetup/signup";
 import ForgotPassword from "../pages/userSetup/forgotPassword";
+import { useEffect, useState } from "react";
+import { CheckUserData } from "../utils/checkUser";
 
 // Shared page transition wrapper
 export const PageTransition = ({ children }) => {
@@ -29,6 +32,19 @@ export const PageTransition = ({ children }) => {
 };
 
 const MainRouter = () => {
+  const [isUserLoged, setIsUserLoged] = useState(false);
+
+  const setUser = async () => {
+    const check = await CheckUserData();
+    if (check.status) {
+      setIsUserLoged(true);
+    }
+  }
+
+  useEffect(() => {
+    setUser();
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<PageTransition><LandingPage /></PageTransition>} />
@@ -38,7 +54,8 @@ const MainRouter = () => {
       <Route path="/shop/:id" element={<PageTransition><ShopDetails /></PageTransition>} />
       <Route path="/checkout" element={<PageTransition><CheckOut /></PageTransition>} />
       <Route path="/shopping-cart" element={<PageTransition><ShoppingCart /></PageTransition>} />
-      
+      <Route path="/shop/:id/comments" element={<PageTransition><CommentsPage /></PageTransition>} />
+
       {/* User authentication routes */}
       <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
       <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />

@@ -43,7 +43,7 @@ export default function ForgotPassword() {
     console.log("MOCK_OTP: " + mockOtp);
 
     // Simulate OTP alert
-    alert(`[Male Fashion Recovery] Verification code sent to: ${email}.\n\nYour 4-Digit OTP is: ${mockOtp}`);
+    alert(`[Shop Now Recovery] Verification code sent to: ${email}.\n\nYour 4-Digit OTP is: ${mockOtp}`);
     
     // Swap state
     setStep("reset");
@@ -69,7 +69,7 @@ export default function ForgotPassword() {
     setTimer(60);
     setCanResend(false);
     console.log("MOCK_OTP: " + newOtp);
-    alert(`[Male Fashion Recovery] New Verification code sent!\n\nYour 4-Digit OTP is: ${newOtp}`);
+    alert(`[Shop Now Recovery] New Verification code sent!\n\nYour 4-Digit OTP is: ${newOtp}`);
     if (inputRefs[0].current) {
       inputRefs[0].current.focus();
     }

@@ -55,7 +55,7 @@ export default function Signup() {
     console.log("MOCK_OTP: " + mockOtp);
 
     // Simulate OTP email trigger
-    alert(`[Male Fashion Verification] A secure OTP has been sent to ${formData.email}.\n\nYour 4-Digit OTP is: ${mockOtp}`);
+    alert(`[Shop Now Verification] A secure OTP has been sent to ${formData.email}.\n\nYour 4-Digit OTP is: ${mockOtp}`);
     
     // Switch state to OTP enter
     setStep("otp");
@@ -81,7 +81,7 @@ export default function Signup() {
     setTimer(60);
     setCanResend(false);
     console.log("MOCK_OTP: " + newOtp);
-    alert(`[Male Fashion Verification] New OTP sent!\n\nYour 4-Digit OTP is: ${newOtp}`);
+    alert(`[Shop Now Verification] New OTP sent!\n\nYour 4-Digit OTP is: ${newOtp}`);
     if (inputRefs[0].current) {
       inputRefs[0].current.focus();
     }

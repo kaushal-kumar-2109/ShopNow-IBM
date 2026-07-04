@@ -387,7 +387,7 @@ export default function LandingPage() {
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
                   incididunt ut labore et dolore magna aliqua.
                 </p>
-                <h3>#Male_Fashion</h3>
+                <h3>#Shop_Now</h3>
               </div>
             </div>
           </div>
@@ -401,7 +401,7 @@ export default function LandingPage() {
             <div className="col-lg-12">
               <div className="section-title">
                 <span>Latest News</span>
-                <h2>Fashion New Trends</h2>
+                <h2>Shop Now New Trends</h2>
               </div>
             </div>
           </div>

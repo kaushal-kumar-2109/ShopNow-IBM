@@ -18,7 +18,7 @@ export default function Footer() {
             <div className="footer__about">
               <div className="footer__logo">
                 <Link to="/">
-                  <img src="/img/footer-logo.png" alt="Male Fashion Footer Logo" />
+                  <img src="/img/footer-logo.png" alt="Shop Now Footer Logo" />
                 </Link>
               </div>
               <p>The customer is at the heart of our unique business model, which includes design.</p>

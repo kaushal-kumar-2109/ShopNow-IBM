@@ -8,8 +8,10 @@ import Loader from "../../components/Loader";
 export default function ShopDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart, toggleWishlist, wishlist } = useShop();
+  const { addToCart, toggleWishlist, wishlist, comments, addComment } = useShop();
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState("");
+  const [commentText, setCommentText] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 500);
@@ -53,6 +55,19 @@ export default function ShopDetails() {
 
   const handleAddToCart = () => {
     addToCart(product, selectedSize, selectedColor, quantity);
+  };
+
+  const productComments = comments ? comments.filter((c) => c.productId === product.id) : [];
+
+  const handlePostComment = (e) => {
+    e.preventDefault();
+    if (!userName.trim() || !commentText.trim()) {
+      alert("Please fill in both your name and comment.");
+      return;
+    }
+    addComment(product.id, userName, commentText);
+    setCommentText("");
+    alert("Thank you! Your comment has been posted.");
   };
 
   return (
@@ -216,6 +231,131 @@ export default function ShopDetails() {
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Comments Section */}
+      <section className="comments-section spad" style={{ borderTop: "1px solid #eee", paddingTop: "50px", paddingBottom: "50px" }}>
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-8 offset-lg-2">
+              <div className="section-title" style={{ textAlign: "left", marginBottom: "30px" }}>
+                <span style={{ color: "#e53637", fontWeight: "700", textTransform: "uppercase", fontSize: "14px", display: "block", marginBottom: "10px" }}>Reviews & Feedback</span>
+                <h2 style={{ fontWeight: "700", color: "#111" }}>Product Comments</h2>
+              </div>
+
+              {/* Comments list (shows 4 comments) */}
+              <div style={{ marginBottom: "40px" }}>
+                {productComments.length === 0 ? (
+                  <p style={{ color: "#777", fontStyle: "italic" }}>No comments yet for this product. Be the first to review!</p>
+                ) : (
+                  <div>
+                    {productComments.slice(0, 4).map((commentItem) => (
+                      <div
+                        key={commentItem.id}
+                        style={{
+                          display: "flex",
+                          gap: "15px",
+                          paddingBottom: "15px",
+                          borderBottom: "1px solid #f2f2f2",
+                          marginBottom: "15px"
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "50%",
+                            backgroundColor: "#f5f5f5",
+                            border: "1px solid #e1e1e1",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            fontWeight: "700",
+                            color: "#111",
+                            flexShrink: 0
+                          }}
+                        >
+                          {commentItem.userName ? commentItem.userName.charAt(0).toUpperCase() : "U"}
+                        </div>
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "3px" }}>
+                            <h6 style={{ fontWeight: "700", margin: 0, fontSize: "14px" }}>{commentItem.userName}</h6>
+                            <span style={{ fontSize: "11px", color: "#888" }}>{commentItem.date}</span>
+                          </div>
+                          <p style={{ fontSize: "13px", color: "#444", margin: 0, lineHeight: "1.4" }}>
+                            {commentItem.comment}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+
+                    {productComments.length > 4 && (
+                      <div style={{ marginTop: "20px" }}>
+                        <Link to={`/shop/${product.id}/comments`} className="site-btn" style={{ background: "#f5f5f5", color: "#111", border: "1px solid #e1e1e1" }}>
+                          View All Comments ({productComments.length})
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Add Comment Form */}
+              <div 
+                style={{ 
+                  border: "1px solid #e1e1e1", 
+                  padding: "25px", 
+                  borderRadius: "4px",
+                  backgroundColor: "#fcfcfc"
+                }}
+              >
+                <h5 style={{ fontWeight: "700", marginBottom: "15px" }}>Leave A Comment</h5>
+                <form onSubmit={handlePostComment}>
+                  <div style={{ marginBottom: "15px" }}>
+                    <input 
+                      type="text" 
+                      placeholder="Your Name"
+                      value={userName}
+                      onChange={(e) => setUserName(e.target.value)}
+                      style={{
+                        width: "100%",
+                        height: "40px",
+                        border: "1px solid #e1e1e1",
+                        paddingLeft: "15px",
+                        fontSize: "13px",
+                        borderRadius: "2px",
+                        outline: "none"
+                      }}
+                      required
+                    />
+                  </div>
+                  <div style={{ marginBottom: "20px" }}>
+                    <textarea 
+                      placeholder="Your Comment"
+                      rows="4"
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      style={{
+                        width: "100%",
+                        border: "1px solid #e1e1e1",
+                        padding: "15px",
+                        fontSize: "13px",
+                        borderRadius: "2px",
+                        outline: "none",
+                        resize: "vertical"
+                      }}
+                      required
+                    />
+                  </div>
+                  <button type="submit" className="site-btn" style={{ padding: "10px 25px", fontSize: "13px" }}>
+                    Post Comment
+                  </button>
+                </form>
+              </div>
+
             </div>
           </div>
         </div>
