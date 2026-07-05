@@ -78,7 +78,7 @@ async function seedComments() {
         const bulkComments = [];
 
         for (const product of products) {
-            const totalComments = random(3, 8);
+            const totalComments = Math.min(random(3, 8), users.length);
 
             // Prevent duplicate users commenting on the same product
             const usedUsers = new Set();

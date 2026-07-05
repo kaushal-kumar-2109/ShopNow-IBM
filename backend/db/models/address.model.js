@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const AddressSchema = mongoose.Schema({
     reciver: {
         type: String,
-        require: true,
+        required: true,
     },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,

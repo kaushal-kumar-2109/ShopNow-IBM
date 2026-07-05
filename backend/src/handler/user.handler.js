@@ -109,7 +109,7 @@ const SetUser = async (req, res) => {
                 token: response.token,
                 email: email
             });
-            return res.status(201).json({ message: "User login successfully", token: response.token });
+            return res.status(201).json({ message: "User login successfully", token: response.token, name: user.name });
         } else {
             return res.status(401).json({ tag: "token", message: "Token is not created" });
         }

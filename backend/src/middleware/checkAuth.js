@@ -5,7 +5,7 @@ const CheckUserAuth = async (req, res, next) => {
         const { jwtoken } = req.cookies;
         if (!jwtoken) return res.status(401).json({ tag: "token", message: "User is not authenticated" });
         const tokenData = await Token.findOne({ token: jwtoken });
-        if (!tokenData.token) return res.status(401).json({ tag: "token", message: "User is not authenticated" });
+        if (!tokenData) return res.status(401).json({ tag: "token", message: "User is not authenticated" });
         if (tokenData.expires_at < Date.now()) return res.status(401).json({ tag: "token", message: "Token is expired" });
 
         req.email = tokenData.email;
