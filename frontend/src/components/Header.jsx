@@ -21,6 +21,9 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
   const [pagesDropdownOpen, setPagesDropdownOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
+  const rawUser = localStorage.getItem("ShopNowUserData");
+  const currentUser = rawUser ? JSON.parse(rawUser) : null;
+
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Shop", path: "/shop" },
@@ -291,7 +294,7 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
                     background: "#e53637", color: "#fff",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: "18px", fontWeight: "700", flexShrink: 0
-                  }}></div>
+                  }}>{currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "U"}</div>
                   <div>
                     <div style={{ fontWeight: "700", fontSize: "15px", color: "#111" }}>{currentUser?.name}</div>
                     <div style={{ fontSize: "12px", color: "#777" }}>{currentUser?.email}</div>

@@ -53,7 +53,7 @@ export default function CommentsPage({ isUserLoged }) {
     });
 
     if (res.flag && res.data) {
-      setComments((prev) => [res.data, ...prev]);
+      setComments((prev) => [res.data.data, ...prev]);
       setCommentText("");
       setSubmitMsg({ text: "✅ Your review has been posted!", ok: true });
     } else {

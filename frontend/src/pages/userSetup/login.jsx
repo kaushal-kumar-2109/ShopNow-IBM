@@ -29,16 +29,22 @@ export default function Login({ setIsUserLoged }) {
 
     try {
       const res = await setUser({ email, password });
-      if (res.flag == false) {
-        toast.error(res.data.message);
+      if (res.flag === false) {
+        toast.error(res.message || (res.data && res.data.message) || "Authentication failed.", { id: toastId });
         return;
       }
 
-      toast.success(res.data.message);
-      localStorage.setItem("ShopNowUserData", JSON.stringify({ email: email, token: res.data.token, loginDate: Date.now(), expiresDate: Date.now() + (7 * 24 * 60 * 60 * 1000) }));
+      toast.success(res.message || (res.data && res.data.message) || "Signed in successfully!", { id: toastId });
+      localStorage.setItem("ShopNowUserData", JSON.stringify({
+        name: res.data.name || email.split("@")[0],
+        email: email,
+        token: res.data.token,
+        loginDate: Date.now(),
+        expiresDate: Date.now() + (7 * 24 * 60 * 60 * 1000)
+      }));
       setIsUserLoged(true);
       navigate("/");
-    } catch {
+    } catch (err) {
       toast.error("Network error. Please try again.", { id: toastId });
     } finally {
       setSubmitting(false);

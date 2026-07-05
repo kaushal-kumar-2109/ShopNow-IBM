@@ -18,9 +18,9 @@ const CheckUserData = async () => {
         if (!user) return { status: false, message: "User not found", data: null };
 
         // 7-day expiry check
-        if (user.loginDate) {
-            if (Date.now() < user.loginDate) {
-                alert("Removing user credentials....");
+        if (user.expiresDate) {
+            if (Date.now() > user.expiresDate) {
+                alert("Your session has expired. Logging you out...");
                 clearSession();
                 return { status: false, message: "Session expired", data: null };
             }

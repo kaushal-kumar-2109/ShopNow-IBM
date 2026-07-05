@@ -86,12 +86,12 @@ export default function Signup({ setIsUserLoged }) {
         tag: "signup",
       });
 
-      if (res.flag == false) {
-        toast.error(res.data.message);
+      if (res.flag === false) {
+        toast.error(res.message || (res.data && res.data.message) || "Failed to send OTP.");
         return;
       }
 
-      toast.success(res.data.message);
+      toast.success(res.message || (res.data && res.data.message) || "OTP sent successfully.");
 
       setStep("otp");
       setOtp("");
@@ -132,12 +132,12 @@ export default function Signup({ setIsUserLoged }) {
         password: formData.password,
         otp,
       });
-      if (res.flag == false) {
-        toast.error(res.data.message);
+      if (res.flag === false) {
+        toast.error(res.message || (res.data && res.data.message) || "Registration failed.");
         return;
       }
 
-      toast.success(res.data.message);
+      toast.success(res.message || (res.data && res.data.message) || "Registration successful!");
       localStorage.setItem("ShopNowUserData", JSON.stringify({ name: formData.name, email: formData.email, token: res.data.token, loginDate: Date.now(), expiresDate: Date.now() + (7 * 24 * 60 * 60 * 1000) }));
       localStorage.setItem("ShopNowUserToken", res.data.token);
       setIsUserLoged(true);
@@ -159,7 +159,7 @@ export default function Signup({ setIsUserLoged }) {
       });
 
       if (!res.flag) {
-        toast.error(res.data?.message || "Unable to resend OTP");
+        toast.error(res.message || (res.data && res.data.message) || "Unable to resend OTP");
         return;
       }
 

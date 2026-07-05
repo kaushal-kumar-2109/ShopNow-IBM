@@ -119,7 +119,7 @@ export default function ShopDetails({ isUserLoged }) {
 
     if (res.flag && res.data) {
       // Optimistically prepend — use the server-returned document
-      setComments((prev) => [res.data, ...prev]);
+      setComments((prev) => [res.data.data, ...prev]);
       setCommentsTotal((t) => t + 1);
       setCommentText("");
       setSubmitMsg({ text: "✅ Your review has been posted!", ok: true });

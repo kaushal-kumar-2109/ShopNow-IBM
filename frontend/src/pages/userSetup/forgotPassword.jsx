@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import Loader from "../../components/Loader";
+import { sendOtp, updateUserPassword } from "../../api/postApiHandler/pstData";
 import "./setup.css";
 
 export default function ForgotPassword() {
@@ -21,7 +23,6 @@ export default function ForgotPassword() {
   const [step, setStep] = useState("request");
 
   // OTP Validation States
-  const [generatedOtp, setGeneratedOtp] = useState("");
   const [otpDigits, setOtpDigits] = useState(["", "", "", ""]);
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
@@ -29,24 +30,27 @@ export default function ForgotPassword() {
   // References for OTP auto-focus shifting
   const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)];
 
-  // Step 1: Submit Reset request -> Send Mock OTP
-  const handleRequestSubmit = (e) => {
+  // Step 1: Submit Reset request -> Send Real OTP
+  const handleRequestSubmit = async (e) => {
     e.preventDefault();
     if (!email) return;
 
-    // Generate random 4-digit OTP
-    const mockOtp = Math.floor(1000 + Math.random() * 9000).toString();
-    setGeneratedOtp(mockOtp);
-    setTimer(60);
-    setCanResend(false);
-
-    console.log("MOCK_OTP: " + mockOtp);
-
-    // Simulate OTP alert
-    alert(`[Shop Now Recovery] Verification code sent to: ${email}.\n\nYour 4-Digit OTP is: ${mockOtp}`);
-
-    // Swap state
-    setStep("reset");
+    setLoading(true);
+    try {
+      const res = await sendOtp({ email, tag: "recover" });
+      if (res.flag === false) {
+        toast.error(res.message || (res.data && res.data.message) || "User not found or error occurred.");
+        return;
+      }
+      toast.success("Verification OTP sent successfully!");
+      setStep("reset");
+      setTimer(60);
+      setCanResend(false);
+    } catch (err) {
+      toast.error("Failed to send OTP. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Timer countdown
@@ -62,16 +66,25 @@ export default function ForgotPassword() {
   }, [step, timer]);
 
   // Resend OTP Code
-  const handleResendOtp = () => {
-    const newOtp = Math.floor(1000 + Math.random() * 9000).toString();
-    setGeneratedOtp(newOtp);
-    setOtpDigits(["", "", "", ""]);
-    setTimer(60);
-    setCanResend(false);
-    console.log("MOCK_OTP: " + newOtp);
-    alert(`[Shop Now Recovery] New Verification code sent!\n\nYour 4-Digit OTP is: ${newOtp}`);
-    if (inputRefs[0].current) {
-      inputRefs[0].current.focus();
+  const handleResendOtp = async () => {
+    setLoading(true);
+    try {
+      const res = await sendOtp({ email, tag: "recover" });
+      if (res.flag === false) {
+        toast.error(res.message || (res.data && res.data.message) || "Unable to resend OTP");
+        return;
+      }
+      toast.success("OTP resent successfully!");
+      setOtpDigits(["", "", "", ""]);
+      setTimer(60);
+      setCanResend(false);
+      if (inputRefs[0].current) {
+        inputRefs[0].current.focus();
+      }
+    } catch (err) {
+      toast.error("Failed to resend OTP.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,27 +108,45 @@ export default function ForgotPassword() {
   };
 
   // Verify Code and Save New Password
-  const handleResetSubmit = (e) => {
+  const handleResetSubmit = async (e) => {
     e.preventDefault();
     const enteredOtp = otpDigits.join("");
 
     if (enteredOtp.length < 4) {
-      alert("Please enter the full 4-digit verification code.");
+      toast.error("Please enter the full 4-digit verification code.");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters.");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      alert("Passwords do not match.");
+      toast.error("Passwords do not match.");
       return;
     }
 
-    if (enteredOtp !== generatedOtp) {
-      alert("Invalid verification code. Please check the code and try again.");
-      return;
-    }
+    setLoading(true);
+    try {
+      const res = await updateUserPassword({
+        email,
+        password: newPassword,
+        otp: enteredOtp
+      });
 
-    alert("Password updated successfully! Please log in with your new credentials.");
-    navigate("/login");
+      if (res.flag === false) {
+        toast.error(res.message || (res.data && res.data.message) || "Failed to reset password.");
+        return;
+      }
+
+      toast.success("Password updated successfully! Please log in with your new credentials.");
+      navigate("/login");
+    } catch (err) {
+      toast.error("Failed to reset password. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
