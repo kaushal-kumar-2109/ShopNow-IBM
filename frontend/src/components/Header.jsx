@@ -179,7 +179,11 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
             <div className="col-lg-3 col-md-3">
               <div className="header__logo">
                 <Link to="/">
-                  <img src="/img/logo1.png" alt="Shop Now Logo" style={{ height: "100%" }} />
+                  <img
+                    src="/img/logo1.png"
+                    alt="Shop Now Logo"
+                    style={{ width: "100%", maxWidth: "180px", height: "auto", display: "block", objectFit: "contain" }}
+                  />
                 </Link>
               </div>
             </div>
@@ -274,7 +278,11 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
 
               <div className="offcanvas__logo">
                 <Link to="/" onClick={handleLinkClick}>
-                  <img src="/img/logo.png" alt="Logo" style={{ marginBottom: "30px" }} />
+                  <img
+                    src="/img/logo1.png"
+                    alt="Logo"
+                    style={{ width: "100%", maxWidth: "180px", height: "auto", display: "block", objectFit: "contain", marginBottom: "30px" }}
+                  />
                 </Link>
               </div>
 
