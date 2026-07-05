@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors({
-    origin: ['https://shop-now-weld.vercel.app', 'http://localhost:5173'],
+    origin: ['https://shop-now-jade.vercel.app', 'http://localhost:5173'],
     credentials: true
 }));
 app.use(cookieParser());
