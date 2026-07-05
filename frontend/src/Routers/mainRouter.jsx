@@ -10,6 +10,7 @@ import CheckOut from "../pages/checkout/checkOut";
 import ShoppingCart from "../pages/shop/shoppingCart";
 import NotFound from "../pages/404/notFound";
 import CommentsPage from "../pages/shop/commentsPage";
+import Wishlist from "../pages/wishlist/wishlist";
 
 // User authentication + profile pages
 import Login from "../pages/userSetup/login";
@@ -46,6 +47,7 @@ const MainRouter = ({ isUserLoged, setIsUserLoged }) => {
       <Route path="/checkout" element={<PageTransition><CheckOut isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
       <Route path="/shopping-cart" element={<PageTransition><ShoppingCart isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
       <Route path="/shop/:id/comments" element={<PageTransition><CommentsPage isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
+      <Route path="/wishlist" element={<PageTransition><Wishlist isUserLoged={isUserLoged} setIsUserLoged={setIsUserLoged} /></PageTransition>} />
 
       {/* Auth routes — redirect to home if already logged in */}
       <Route path="/login" element={<PageTransition><Login setIsUserLoged={setIsUserLoged} /></PageTransition>} />

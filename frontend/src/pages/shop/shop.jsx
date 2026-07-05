@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Loader from "../../components/Loader";
 
 export default function Shop({ isUserLoged, setIsUserLoged }) {
-  const { addToCart, toggleWishlist, wishlist } = useShop();
+  const { addToCart, toggleWishlist, isInWishlist, isCartLoading, isWishlistLoading } = useShop();
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
 
@@ -308,7 +308,7 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                 ) : (
                   <AnimatePresence>
                     {filteredProducts.map((product) => {
-                      const isFavorite = wishlist.includes(product.id);
+                      const isFavorite = isInWishlist(product);
                       return (
                         <motion.div
                           key={product.id}
@@ -333,11 +333,12 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                               {product.hotSale && <span className="label sale">Sale</span>}
 
                               <ul className="product__hover">
-                                <li>
+                                 <li>
                                   <button
                                     onClick={() => toggleWishlist(product)}
-                                    style={{ border: "none", background: "none" }}
+                                    style={{ border: "none", background: "none", opacity: isWishlistLoading(product._id || product.id) ? 0.6 : 1 }}
                                     aria-label="Wishlist toggle"
+                                    disabled={isWishlistLoading(product._id || product.id)}
                                   >
                                     <a className={isFavorite ? "active" : ""}>
                                       <img
@@ -345,12 +346,12 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                                         alt="Wishlist"
                                         style={{ filter: isFavorite ? "hue-rotate(320deg) saturate(3)" : "none" }}
                                       />
-                                      <span>{isFavorite ? "Liked" : "Add to Wishlist"}</span>
+                                      <span>{isWishlistLoading(product._id || product.id) ? "Loading..." : (isFavorite ? "Liked" : "Add to Wishlist")}</span>
                                     </a>
                                   </button>
                                 </li>
                                 <li>
-                                  <Link to={`/shop/${product.id}`}>
+                                  <Link to={`/shop/${product._id || product.id}`}>
                                     <img src="/img/icon/search.png" alt="Search" />
                                     <span>View details</span>
                                   </Link>
@@ -362,8 +363,10 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                               <button
                                 className="add-cart"
                                 onClick={() => addToCart(product)}
+                                disabled={isCartLoading(product._id || product.id)}
+                                style={{ opacity: isCartLoading(product._id || product.id) ? 0.6 : 1 }}
                               >
-                                + Add To Cart
+                                {isCartLoading(product._id || product.id) ? "Adding..." : "+ Add To Cart"}
                               </button>
                               <div className="rating">
                                 {[...Array(5)].map((_, rIdx) => (

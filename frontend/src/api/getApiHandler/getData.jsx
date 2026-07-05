@@ -41,5 +41,15 @@ const getProductComments = async (productId, page = 1, limit = 10) => {
     return await GetDataCall(url);
 }
 
-export { getUserData, getLatestProduct, getProductsByCategory, getLatestProducts, getBannerProducts, getProductById, getProductComments };
+// Fetch user's cart from backend
+const getCart = async () => {
+    return await GetDataCall(ROUTERS.GET_ROUTE.getCart);
+}
+
+// Fetch user's wishlist from backend
+const getWishlist = async () => {
+    return await GetDataCall(ROUTERS.GET_ROUTE.getWishlist);
+}
+
+export { getUserData, getLatestProduct, getProductsByCategory, getLatestProducts, getBannerProducts, getProductById, getProductComments, getCart, getWishlist };
 

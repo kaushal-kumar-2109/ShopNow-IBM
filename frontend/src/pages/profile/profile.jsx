@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import Loader from "../../components/Loader";
 import "./profile.css";
 import { getUserData } from "../../api/getApiHandler/getData";
 
@@ -8,20 +9,24 @@ const ADDRESS_KEY = "ShowNow_Addresses";
 const ORDERS_KEY = "ShowNow_Orders";
 
 export default function Profile({ isUserLoged, setIsUserLoged }) {
-
   const [getUser, setUser] = useState({});
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const getUserRecord = async () => {
-    const res = await getUserData();
-    setUser(res.data);
+    try {
+      const res = await getUserData();
+      setUser(res.data);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
     getUserRecord();
     if (!isUserLoged) {
       navigate("/");
-      return
+      return;
     }
   }, []);
 
@@ -136,6 +141,10 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
     { id: "orders", icon: "fa-shopping-bag", label: "Order History" },
     { id: "settings", icon: "fa-cog", label: "Settings" },
   ];
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="profile-page container spad">

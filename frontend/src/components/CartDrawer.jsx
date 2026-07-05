@@ -51,57 +51,71 @@ export default function CartDrawer() {
                   Your cart is empty.
                 </div>
               ) : (
-                cart.map((item, idx) => (
-                  <div key={idx} className="cart-drawer__item">
-                    <img src={item.product.mainImage} alt={item.product.name} />
-                    <div className="cart-drawer__item-details">
-                      <h5>{item.product.name}</h5>
-                      <p style={{ color: "#888", fontSize: "12px", margin: "2px 0" }}>
-                        Size: {item.size} {item.color && `| Color:`}{" "}
-                        {item.color && (
-                          <span
-                            style={{
-                              display: "inline-block",
-                              width: "10px",
-                              height: "10px",
-                              backgroundColor: item.color,
-                              borderRadius: "50%",
-                              marginLeft: "3px",
-                              verticalAlign: "middle",
-                              border: "1px solid #ccc"
-                            }}
-                          />
-                        )}
-                      </p>
-                      <p style={{ fontWeight: "700" }}>${item.product.price.toFixed(2)}</p>
-                      <div className="cart-drawer__item-qty">
-                        <button
-                          onClick={() =>
-                            updateCartQuantity(item.product.id, item.size, item.color, item.quantity - 1)
-                          }
-                          aria-label="Decrease quantity"
-                        >
-                          -
-                        </button>
-                        <span>{item.quantity}</span>
-                        <button
-                          onClick={() =>
-                            updateCartQuantity(item.product.id, item.size, item.color, item.quantity + 1)
-                          }
-                          aria-label="Increase quantity"
-                        >
-                          +
-                        </button>
+                cart.map((item, idx) => {
+                  const product = item.product;
+                  const pId = product._id || product.id;
+                  const pName = product.title || product.name || "Product";
+                  const pImage = product.images?.[0]?.url || product.mainImage || "";
+                  const pPrice = product.discountPrice ?? product.price ?? 0;
+
+                  return (
+                    <div key={idx} className="cart-drawer__item">
+                      <Link to={`/shop/${pId}`} onClick={handleClose}>
+                        <img src={pImage} alt={pName} style={{ width: "70px", height: "70px", objectFit: "cover" }} />
+                      </Link>
+                      <div className="cart-drawer__item-details">
+                        <h5>
+                          <Link to={`/shop/${pId}`} onClick={handleClose} style={{ color: "inherit" }}>
+                            {pName}
+                          </Link>
+                        </h5>
+                        <p style={{ color: "#888", fontSize: "12px", margin: "2px 0" }}>
+                          Size: {item.size} {item.color && `| Color:`}{" "}
+                          {item.color && (
+                            <span
+                              style={{
+                                display: "inline-block",
+                                width: "10px",
+                                height: "10px",
+                                backgroundColor: item.color,
+                                borderRadius: "50%",
+                                marginLeft: "3px",
+                                verticalAlign: "middle",
+                                border: "1px solid #ccc"
+                              }}
+                            />
+                          )}
+                        </p>
+                        <p style={{ fontWeight: "700" }}>${pPrice.toFixed(2)}</p>
+                        <div className="cart-drawer__item-qty">
+                          <button
+                            onClick={() =>
+                              updateCartQuantity(pId, item.size, item.color, item.quantity - 1)
+                            }
+                            aria-label="Decrease quantity"
+                          >
+                            -
+                          </button>
+                          <span>{item.quantity}</span>
+                          <button
+                            onClick={() =>
+                              updateCartQuantity(pId, item.size, item.color, item.quantity + 1)
+                            }
+                            aria-label="Increase quantity"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                      <div
+                        className="cart-drawer__item-remove"
+                        onClick={() => removeFromCart(pId, item.size, item.color)}
+                      >
+                        <i className="icon_trash_alt"></i>
                       </div>
                     </div>
-                    <div
-                      className="cart-drawer__item-remove"
-                      onClick={() => removeFromCart(item.product.id, item.size, item.color)}
-                    >
-                      <i className="icon_trash_alt"></i>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 

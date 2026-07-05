@@ -10,7 +10,7 @@ import { STORAGE_KEY } from "../../utils/checkUser";
 export default function ShopDetails({ isUserLoged }) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart, toggleWishlist, wishlist } = useShop();
+  const { addToCart, toggleWishlist, isInWishlist, isCartLoading, isWishlistLoading } = useShop();
 
   /* ─── product state ─── */
   const [product, setProduct]   = useState(null);
@@ -149,7 +149,7 @@ export default function ShopDetails({ isUserLoged }) {
     );
   }
 
-  const isFavorite   = wishlist.some((w) => (w._id || w) === product._id);
+  const isFavorite   = isInWishlist(product);
   const displayPrice = product.discountPrice ?? product.price;
   const hasDiscount  = !!product.discountPrice;
   const allImages    = product.images || [];
@@ -329,22 +329,27 @@ export default function ShopDetails({ isUserLoged }) {
                   <button
                     className="primary-btn"
                     onClick={() => addToCart({ ...product, selectedSize, selectedColor }, quantity)}
-                    disabled={product.stock === 0}
-                    style={{ flexGrow: 1 }}
+                    disabled={product.stock === 0 || isCartLoading(product._id)}
+                    style={{ flexGrow: 1, opacity: isCartLoading(product._id) ? 0.6 : 1 }}
                   >
-                    {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+                    {product.stock === 0 ? "Out of Stock" : (isCartLoading(product._id) ? "Adding..." : "Add to Cart")}
                   </button>
                 </div>
 
                 {/* Wishlist */}
-                <button onClick={() => toggleWishlist(product)} className="site-btn"
+                <button 
+                  onClick={() => toggleWishlist(product)} 
+                  className="site-btn"
+                  disabled={isWishlistLoading(product._id)}
                   style={{
                     width: "100%", marginBottom: "24px",
                     background: isFavorite ? "#e53637" : "#111",
                     display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
-                  }}>
+                    opacity: isWishlistLoading(product._id) ? 0.6 : 1
+                  }}
+                >
                   <i className="fa fa-heart" />
-                  {isFavorite ? "Remove from Wishlist" : "Add to Wishlist"}
+                  {isWishlistLoading(product._id) ? "Updating Wishlist..." : (isFavorite ? "Remove from Wishlist" : "Add to Wishlist")}
                 </button>
 
                 {/* Meta */}

@@ -21,4 +21,24 @@ const postComment = async (data) => {
     return await PostDataCall(ROUTERS.POST_ROUTE.postComment, data);
 }
 
-export { sendOtp, createUser, setUser, updateUserPassword, postComment };
+const apiAddToCart = async (data) => {
+    return await PostDataCall(ROUTERS.POST_ROUTE.addToCart, data);
+}
+
+const apiUpdateCartQuantity = async (data) => {
+    return await PostDataCall(ROUTERS.POST_ROUTE.updateCartQuantity, data);
+}
+
+const apiRemoveFromCart = async (data) => {
+    return await PostDataCall(ROUTERS.POST_ROUTE.removeFromCart, data);
+}
+
+const apiClearCart = async () => {
+    return await PostDataCall(ROUTERS.POST_ROUTE.clearCart, {});
+}
+
+const apiToggleWishlist = async (data) => {
+    return await PostDataCall(ROUTERS.POST_ROUTE.toggleWishlist, data);
+}
+
+export { sendOtp, createUser, setUser, updateUserPassword, postComment, apiAddToCart, apiUpdateCartQuantity, apiRemoveFromCart, apiClearCart, apiToggleWishlist };

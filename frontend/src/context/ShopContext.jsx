@@ -1,17 +1,16 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import toast from "react-hot-toast";
+import { getCart, getWishlist } from "../api/getApiHandler/getData";
+import { apiAddToCart, apiUpdateCartQuantity, apiRemoveFromCart, apiClearCart, apiToggleWishlist } from "../api/postApiHandler/pstData";
 
 const ShopContext = createContext();
 
 export const ShopProvider = ({ children }) => {
-  const [cart, setCart] = useState(() => {
-    const saved = localStorage.getItem("cart");
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [wishlist, setWishlist] = useState(() => {
-    const saved = localStorage.getItem("wishlist");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [cart, setCart] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+  const [currentUserEmail, setCurrentUserEmail] = useState("");
+  const [cartLoadingIds, setCartLoadingIds] = useState([]);
+  const [wishlistLoadingIds, setWishlistLoadingIds] = useState([]);
 
   const [comments, setComments] = useState(() => {
     const saved = localStorage.getItem("comments");
@@ -56,13 +55,58 @@ export const ShopProvider = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+  // DB functions to load cart and wishlist
+  const fetchCartFromDb = async () => {
+    try {
+      const res = await getCart();
+      if (res.flag && res.data) {
+        const dbItems = (res.data.items || []).map((item) => ({
+          product: item.product_id,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity
+        }));
+        setCart(dbItems);
+      }
+    } catch (err) {
+      console.error("Error fetching cart from DB", err);
+    }
+  };
 
+  const fetchWishlistFromDb = async () => {
+    try {
+      const res = await getWishlist();
+      if (res.flag && res.data) {
+        setWishlist(res.data.products || []);
+      }
+    } catch (err) {
+      console.error("Error fetching wishlist from DB", err);
+    }
+  };
+
+  // Sync state automatically upon login/logout state change
   useEffect(() => {
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-  }, [wishlist]);
+    const checkLoginChange = () => {
+      const raw = localStorage.getItem("ShopNowUserData");
+      const user = raw ? JSON.parse(raw) : null;
+      const email = user ? user.email : "";
+
+      if (email !== currentUserEmail) {
+        setCurrentUserEmail(email);
+        if (email) {
+          fetchCartFromDb();
+          fetchWishlistFromDb();
+        } else {
+          setCart([]);
+          setWishlist([]);
+        }
+      }
+    };
+
+    const interval = setInterval(checkLoginChange, 1000);
+    checkLoginChange();
+    return () => clearInterval(interval);
+  }, [currentUserEmail]);
 
   useEffect(() => {
     localStorage.setItem("comments", JSON.stringify(comments));
@@ -79,69 +123,132 @@ export const ShopProvider = ({ children }) => {
     setComments((prev) => [newComment, ...prev]);
   };
 
-  const addToCart = (product, size = "M", color = "", quantity = 1) => {
-    // Pick default color if none provided
-    const selectedColor = color || (product.colors && product.colors[0]) || "";
-    // Pick default size if none provided
-    const selectedSize = size || (product.sizes && product.sizes[0]) || "OS";
-
-    setCart((prev) => {
-      const existingIndex = prev.findIndex(
-        (item) =>
-          item.product.id === product.id &&
-          item.size === selectedSize &&
-          item.color === selectedColor
-      );
-
-      if (existingIndex > -1) {
-        const updated = [...prev];
-        updated[existingIndex].quantity += quantity;
-        return updated;
-      }
-
-      return [...prev, { product, size: selectedSize, color: selectedColor, quantity }];
-    });
-
-    // Automatically trigger cart drawer for quick feedback
-    setCartDrawerOpen(true);
-  };
-
-  const removeFromCart = (productId, size, color) => {
-    setCart((prev) =>
-      prev.filter(
-        (item) =>
-          !(item.product.id === productId && item.size === size && item.color === color)
-      )
-    );
-  };
-
-  const updateCartQuantity = (productId, size, color, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId, size, color);
+  const addToCart = async (product, sizeOrQty = "M", color = "", quantity = 1) => {
+    const logged = !!localStorage.getItem("ShopNowUserData");
+    if (!logged) {
+      toast.error("Only logged in users can add products to the cart!");
       return;
     }
-    setCart((prev) =>
-      prev.map((item) =>
-        item.product.id === productId && item.size === size && item.color === color
-          ? { ...item, quantity }
-          : item
-      )
-    );
-  };
 
-  const toggleWishlist = (product) => {
-    const productId = typeof product === "object" ? product.id : product;
-    setWishlist((prev) => {
-      if (prev.includes(productId)) {
-        return prev.filter((id) => id !== productId);
+    let size = sizeOrQty;
+    let qty = quantity;
+    if (typeof sizeOrQty === "number") {
+      qty = sizeOrQty;
+      size = product.sizes?.[0] || "OS";
+    }
+
+    const selectedColor = color || (product.colors && product.colors[0]) || "";
+    const selectedSize = size || (product.sizes && product.sizes[0]) || "OS";
+    const productId = product._id || product.id;
+
+    setCartLoadingIds((prev) => [...prev, productId]);
+    try {
+      const res = await apiAddToCart({
+        product_id: productId,
+        size: selectedSize,
+        color: selectedColor,
+        quantity: qty
+      });
+
+      if (res.flag && res.data && res.data.data) {
+        const dbItems = (res.data.data.items || []).map((item) => ({
+          product: item.product_id,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity
+        }));
+        setCart(dbItems);
+        setCartDrawerOpen(true);
+        toast.success(`"${product.title || product.name}" added to cart!`);
       } else {
-        return [...prev, productId];
+        toast.error(res.message || "Failed to add product to cart");
       }
-    });
+    } catch (err) {
+      console.error(err);
+      toast.error("Error adding to cart");
+    } finally {
+      setCartLoadingIds((prev) => prev.filter((id) => id !== productId));
+    }
   };
 
-  const clearCart = () => {
-    setCart([]);
+  const removeFromCart = async (productId, size, color) => {
+    try {
+      const res = await apiRemoveFromCart({ product_id: productId, size, color });
+      if (res.flag && res.data && res.data.data) {
+        const dbItems = (res.data.data.items || []).map((item) => ({
+          product: item.product_id,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity
+        }));
+        setCart(dbItems);
+        toast.success("Removed from cart");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const updateCartQuantity = async (productId, size, color, quantity) => {
+    if (quantity <= 0) {
+      await removeFromCart(productId, size, color);
+      return;
+    }
+    try {
+      const res = await apiUpdateCartQuantity({ product_id: productId, size, color, quantity });
+      if (res.flag && res.data && res.data.data) {
+        const dbItems = (res.data.data.items || []).map((item) => ({
+          product: item.product_id,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity
+        }));
+        setCart(dbItems);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleWishlist = async (product) => {
+    const logged = !!localStorage.getItem("ShopNowUserData");
+    if (!logged) {
+      toast.error("Only logged in users can add products to the wishlist!");
+      return;
+    }
+
+    const productId = product._id || product.id || product;
+    setWishlistLoadingIds((prev) => [...prev, productId]);
+
+    try {
+      const res = await apiToggleWishlist({ product_id: productId });
+      if (res.flag && res.data && res.data.data) {
+        setWishlist(res.data.data.products || []);
+        if (res.data.action === "added") {
+          toast.success("Added to wishlist!");
+        } else {
+          toast.success("Removed from wishlist");
+        }
+      } else {
+        toast.error(res.message || "Failed to update wishlist");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating wishlist");
+    } finally {
+      setWishlistLoadingIds((prev) => prev.filter((id) => id !== productId));
+    }
+  };
+
+  const clearCart = async () => {
+    try {
+      const res = await apiClearCart();
+      if (res.flag) {
+        setCart([]);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const getCartCount = () => {
@@ -149,8 +256,20 @@ export const ShopProvider = ({ children }) => {
   };
 
   const getCartTotal = () => {
-    return cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+    return cart.reduce((acc, item) => {
+      const price = item.product?.discountPrice ?? item.product?.price ?? 0;
+      return acc + price * item.quantity;
+    }, 0);
   };
+
+  const isInWishlist = (product) => {
+    if (!product) return false;
+    const productId = product._id || product.id || product;
+    return wishlist.some((item) => (item._id || item.id || item) === productId);
+  };
+
+  const isCartLoading = (productId) => cartLoadingIds.includes(productId);
+  const isWishlistLoading = (productId) => wishlistLoadingIds.includes(productId);
 
   return (
     <ShopContext.Provider
@@ -169,6 +288,9 @@ export const ShopProvider = ({ children }) => {
         removeFromCart,
         updateCartQuantity,
         toggleWishlist,
+        isInWishlist,
+        isCartLoading,
+        isWishlistLoading,
         clearCart,
         getCartCount,
         getCartTotal,

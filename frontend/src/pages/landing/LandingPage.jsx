@@ -17,7 +17,7 @@ const CATEGORIES = [
 ];
 
 export default function LandingPage() {
-  const { addToCart, toggleWishlist, wishlist } = useShop();
+  const { addToCart, toggleWishlist, isInWishlist, isCartLoading, isWishlistLoading } = useShop();
 
   /* ─────────── page-level loading ─────────── */
   const [pageReady, setPageReady] = useState(false);
@@ -241,10 +241,11 @@ export default function LandingPage() {
                               </Link>
                               <button
                                 className="primary-btn"
-                                style={{ background: "transparent", border: "2px solid #fff", color: "#fff" }}
+                                style={{ background: "transparent", border: "2px solid #fff", color: "#fff", opacity: isCartLoading(product._id) ? 0.6 : 1 }}
                                 onClick={() => addToCart(product)}
+                                disabled={isCartLoading(product._id)}
                               >
-                                + Add to Cart
+                                {isCartLoading(product._id) ? "Adding..." : "+ Add to Cart"}
                               </button>
                             </motion.div>
 
@@ -366,7 +367,7 @@ export default function LandingPage() {
                   </p>
                 ) : (
                   products.map((product) => {
-                    const isFavorite = wishlist.includes(product._id);
+                    const isFavorite = isInWishlist(product);
                     const mainImage = product.images?.[0]?.url || "";
                     return (
                       <motion.div
@@ -394,8 +395,9 @@ export default function LandingPage() {
                               <li>
                                 <button
                                   onClick={() => toggleWishlist(product)}
-                                  style={{ border: "none", background: "none" }}
+                                  style={{ border: "none", background: "none", opacity: isWishlistLoading(product._id) ? 0.6 : 1 }}
                                   aria-label="Add to Wishlist"
+                                  disabled={isWishlistLoading(product._id)}
                                 >
                                   <a className={isFavorite ? "active" : ""}>
                                     <img
@@ -403,7 +405,7 @@ export default function LandingPage() {
                                       alt="Like"
                                       style={{ filter: isFavorite ? "hue-rotate(320deg) saturate(3)" : "none" }}
                                     />
-                                    <span>{isFavorite ? "Liked" : "Add to Wishlist"}</span>
+                                    <span>{isWishlistLoading(product._id) ? "Loading..." : (isFavorite ? "Liked" : "Add to Wishlist")}</span>
                                   </a>
                                 </button>
                               </li>
@@ -417,8 +419,13 @@ export default function LandingPage() {
                           </div>
                           <div className="product__item__text">
                             <h6>{product.title}</h6>
-                            <button className="add-cart" onClick={() => addToCart(product)}>
-                              + Add To Cart
+                            <button 
+                              className="add-cart" 
+                              onClick={() => addToCart(product)}
+                              disabled={isCartLoading(product._id)}
+                              style={{ opacity: isCartLoading(product._id) ? 0.6 : 1 }}
+                            >
+                              {isCartLoading(product._id) ? "Adding..." : "+ Add To Cart"}
                             </button>
                             <div className="rating">
                               {[...Array(5)].map((_, rIdx) => (

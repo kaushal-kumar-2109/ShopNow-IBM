@@ -4,7 +4,7 @@ import { useShop } from "../../context/ShopContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "../../components/Loader";
 
-export default function ShoppingCart({ isUserLoged, setIsUserLoged }) {
+export default function ShoppingCart() {
   const { cart, updateCartQuantity, removeFromCart, getCartTotal } = useShop();
   const [loading, setLoading] = useState(true);
 
@@ -87,82 +87,97 @@ export default function ShoppingCart({ isUserLoged, setIsUserLoged }) {
                     </thead>
                     <tbody>
                       <AnimatePresence>
-                        {cart.map((item, idx) => (
-                          <motion.tr
-                            key={idx}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <td className="product__cart__item">
-                              <div className="product__cart__item__pic">
-                                <img
-                                  src={item.product.mainImage}
-                                  alt={item.product.name}
-                                  style={{ width: "90px", height: "90px", objectFit: "cover" }}
-                                />
-                              </div>
-                              <div className="product__cart__item__text">
-                                <h6>{item.product.name}</h6>
-                                <p style={{ fontSize: "12px", color: "#888", marginBottom: 0 }}>
-                                  Size: {item.size} {item.color && `| Color:`}{" "}
-                                  {item.color && (
-                                    <span
-                                      style={{
-                                        display: "inline-block",
-                                        width: "10px",
-                                        height: "10px",
-                                        backgroundColor: item.color,
-                                        borderRadius: "50%",
-                                        marginLeft: "3px",
-                                        verticalAlign: "middle",
-                                        border: "1px solid #ccc"
-                                      }}
-                                    />
-                                  )}
-                                </p>
-                                <h5>${item.product.price.toFixed(2)}</h5>
-                              </div>
-                            </td>
-                            <td>
-                              <div className="quantity">
-                                <i
-                                  className="fa fa-angle-left"
-                                  onClick={() =>
-                                    updateCartQuantity(
-                                      item.product.id,
-                                      item.size,
-                                      item.color,
-                                      item.quantity - 1
-                                    )
-                                  }
-                                />
-                                <span>{item.quantity}</span>
-                                <i
-                                  className="fa fa-angle-right"
-                                  onClick={() =>
-                                    updateCartQuantity(
-                                      item.product.id,
-                                      item.size,
-                                      item.color,
-                                      item.quantity + 1
-                                    )
-                                  }
-                                />
-                              </div>
-                            </td>
-                            <td className="cart__price">
-                              ${(item.product.price * item.quantity).toFixed(2)}
-                            </td>
-                            <td
-                              className="cart__close"
-                              onClick={() => removeFromCart(item.product.id, item.size, item.color)}
+                        {cart.map((item, idx) => {
+                          const product = item.product;
+                          const pId = product._id || product.id;
+                          const pName = product.title || product.name || "Product";
+                          const pImage = product.images?.[0]?.url || product.mainImage || "";
+                          const pPrice = product.discountPrice ?? product.price ?? 0;
+
+                          return (
+                            <motion.tr
+                              key={`${pId}-${item.size}-${item.color}-${idx}`}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0, y: -20 }}
+                              transition={{ duration: 0.3 }}
                             >
-                              <i className="icon_close"></i>
-                            </td>
-                          </motion.tr>
-                        ))}
+                              <td className="product__cart__item">
+                                <div className="product__cart__item__pic">
+                                  <Link to={`/shop/${pId}`}>
+                                    <img
+                                      src={pImage}
+                                      alt={pName}
+                                      style={{ width: "90px", height: "90px", objectFit: "cover" }}
+                                    />
+                                  </Link>
+                                </div>
+                                <div className="product__cart__item__text">
+                                  <h6>
+                                    <Link to={`/shop/${pId}`} style={{ color: "inherit" }}>
+                                      {pName}
+                                    </Link>
+                                  </h6>
+                                  <p style={{ fontSize: "12px", color: "#888", marginBottom: 0 }}>
+                                    Size: {item.size} {item.color && `| Color:`}{" "}
+                                    {item.color && (
+                                      <span
+                                        style={{
+                                          display: "inline-block",
+                                          width: "10px",
+                                          height: "10px",
+                                          backgroundColor: item.color,
+                                          borderRadius: "50%",
+                                          marginLeft: "3px",
+                                          verticalAlign: "middle",
+                                          border: "1px solid #ccc"
+                                        }}
+                                      />
+                                    )}
+                                  </p>
+                                  <h5>${pPrice.toFixed(2)}</h5>
+                                </div>
+                              </td>
+                              <td>
+                                <div className="quantity">
+                                  <i
+                                    className="fa fa-angle-left"
+                                    onClick={() =>
+                                      updateCartQuantity(
+                                        pId,
+                                        item.size,
+                                        item.color,
+                                        item.quantity - 1
+                                      )
+                                    }
+                                  />
+                                  <span>{item.quantity}</span>
+                                  <i
+                                    className="fa fa-angle-right"
+                                    onClick={() =>
+                                      updateCartQuantity(
+                                        pId,
+                                        item.size,
+                                        item.color,
+                                        item.quantity + 1
+                                      )
+                                    }
+                                  />
+                                </div>
+                              </td>
+                              <td className="cart__price">
+                                ${(pPrice * item.quantity).toFixed(2)}
+                              </td>
+                              <td
+                                className="cart__close"
+                                onClick={() => removeFromCart(pId, item.size, item.color)}
+                                style={{ cursor: "pointer" }}
+                              >
+                                <i className="icon_close"></i>
+                              </td>
+                            </motion.tr>
+                          );
+                        })}
                       </AnimatePresence>
                     </tbody>
                   </table>
