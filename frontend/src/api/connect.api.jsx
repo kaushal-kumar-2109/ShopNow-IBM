@@ -8,7 +8,8 @@ const ROUTERS = {
         setUser: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/set-user`
     },
     GET_ROUTE: {
-        getUser: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-user`
+        getUser: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-user`,
+        getLatestProduct: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-latest-product`
     },
     PUT_ROUTE: {
         updatePassword: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-password`
