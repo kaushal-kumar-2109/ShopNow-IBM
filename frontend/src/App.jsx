@@ -10,7 +10,19 @@ import MainRouter from "./Routers/mainRouter";
 import { CheckUserData } from "./utils/checkUser";
 
 function App() {
-  const [isUserLoged, setIsUserLoged] = useState(false);
+  const [isUserLoged, setIsUserLoged] = useState(() => {
+    try {
+      const raw = localStorage.getItem("ShopNowUserData");
+      if (!raw) return false;
+      const user = JSON.parse(raw);
+      if (user && user.expiresDate && Date.now() > user.expiresDate) {
+        return false;
+      }
+      return !!user;
+    } catch {
+      return false;
+    }
+  });
 
   const checkUserLoged = async () => {
     const res = await CheckUserData();
