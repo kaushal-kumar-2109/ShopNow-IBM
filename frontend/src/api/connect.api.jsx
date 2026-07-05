@@ -11,7 +11,14 @@ const ROUTERS = {
         updateCartQuantity: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/update-cart-quantity`,
         removeFromCart: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/remove-from-cart`,
         clearCart: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/clear-cart`,
-        toggleWishlist: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/toggle-wishlist`
+        toggleWishlist: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/toggle-wishlist`,
+        updateProfile: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/update-profile`,
+        addAddress: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/add-address`,
+        updateAddress: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/update-address`,
+        deleteAddress: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/delete-address`,
+        placeOrder: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/place-order`,
+        cancelOrder: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/cancel-order`,
+        updateOrder: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/update-order`
     },
     GET_ROUTE: {
         getUser: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-user`,
@@ -19,7 +26,9 @@ const ROUTERS = {
         getProduct: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-product`,
         getProductComments: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-product-comments`,
         getCart: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-cart`,
-        getWishlist: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-wishlist`
+        getWishlist: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-wishlist`,
+        getAddress: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-address`,
+        getOrders: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-orders`
     },
     PUT_ROUTE: {
         updatePassword: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-password`

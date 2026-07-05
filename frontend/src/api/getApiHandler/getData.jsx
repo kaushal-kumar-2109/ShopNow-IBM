@@ -51,5 +51,24 @@ const getWishlist = async () => {
     return await GetDataCall(ROUTERS.GET_ROUTE.getWishlist);
 }
 
-export { getUserData, getLatestProduct, getProductsByCategory, getLatestProducts, getBannerProducts, getProductById, getProductComments, getCart, getWishlist };
+// Fetch all shop products from backend with pagination support
+const getAllShopProducts = async (page = 1, limit = 9, category = "") => {
+    let url = `${ROUTERS.GET_ROUTE.getLatestProduct}?page=${page}&limit=${limit}`;
+    if (category && category !== "All") {
+        url += `&category=${encodeURIComponent(category)}`;
+    }
+    return await GetDataCall(url);
+}
+
+// Fetch user's addresses from backend
+const getAddresses = async () => {
+    return await GetDataCall(ROUTERS.GET_ROUTE.getAddress);
+}
+
+// Fetch user's orders from backend
+const getOrdersList = async () => {
+    return await GetDataCall(ROUTERS.GET_ROUTE.getOrders);
+}
+
+export { getUserData, getLatestProduct, getProductsByCategory, getLatestProducts, getBannerProducts, getProductById, getProductComments, getCart, getWishlist, getAllShopProducts, getAddresses, getOrdersList };
 

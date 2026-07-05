@@ -10,7 +10,9 @@ const GetDataCall = async (url) => {
             return {
                 flag: true,
                 message: data.message,
-                data: data.data
+                data: data.data,
+                total: data.total,
+                totalPages: data.totalPages
             };
         } else {
             return {

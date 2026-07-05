@@ -159,4 +159,19 @@ const GetUserData = async (req, res) => {
     }
 }
 
-module.exports = { SendOtp, CreateUser, SetUser, UpdateUserPassword, GetUserData };
+const UpdateProfile = async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) return res.status(400).json({ message: "Name is required" });
+
+        const user = await User.findOneAndUpdate({ email: req.email }, { name }, { new: true });
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        return res.status(200).json({ message: "Profile updated successfully", data: user });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error", error: err });
+    }
+}
+
+module.exports = { SendOtp, CreateUser, SetUser, UpdateUserPassword, GetUserData, UpdateProfile };

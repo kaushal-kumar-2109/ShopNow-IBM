@@ -10,10 +10,7 @@ export default function About({ isUserLoged, setIsUserLoged }) {
     return () => clearTimeout(timer);
   }, []);
   const teamMembers = [
-    { name: "John Smith", role: "Fashion Design", img: "/img/about/team-1.jpg" },
-    { name: "Christine Wise", role: "C.E.O", img: "/img/about/team-2.jpg" },
-    { name: "Sean Robbins", role: "Manager", img: "/img/about/team-3.jpg" },
-    { name: "Lucy Myers", role: "Delivery", img: "/img/about/team-4.jpg" }
+    { name: "Kishore Kumar", role: "Full Stack Developer", img: "/img/about/team-1.png" },
   ];
 
   const counterItems = [
@@ -132,7 +129,7 @@ export default function About({ isUserLoged, setIsUserLoged }) {
               </div>
             </div>
           </div>
-          <div className="row">
+          <div className="row" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
             {teamMembers.map((member, idx) => (
               <div key={idx} className="col-lg-3 col-md-6 col-sm-6 text-center">
                 <div className="team__item" style={{ marginBottom: "30px" }}>

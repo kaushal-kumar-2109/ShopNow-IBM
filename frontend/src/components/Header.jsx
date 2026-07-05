@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useShop } from "../context/ShopContext";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import { clearSession } from "../utils/checkUser";
 
 export default function Header({ isUserLoged, setIsUserLoged }) {
   const {
@@ -40,7 +41,7 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
   };
 
   const handleLogout = () => {
-    logoutUser();
+    clearSession();
     setIsUserLoged(false);
     setUserDropdownOpen(false);
     toast.success("Logged out successfully. See you soon!");
@@ -175,7 +176,7 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
             <div className="col-lg-3 col-md-3">
               <div className="header__logo">
                 <Link to="/">
-                  <img src="/img/logo.png" alt="Shop Now Logo" />
+                  <img src="/img/logo1.png" alt="Shop Now Logo" style={{ height: "100%" }} />
                 </Link>
               </div>
             </div>
@@ -220,7 +221,7 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
             {/* Icons / Actions */}
             <div className="col-lg-3 col-md-3">
               <div className="header__nav__option">
-                <button onClick={() => setSearchOpen(true)} className="search-switch" aria-label="Search button">
+                <button onClick={() => setSearchOpen(true)} className="search-switch" style={{ marginRight: "15px" }} aria-label="Search button">
                   <img src="/img/icon/search.png" alt="Search" />
                 </button>
                 <Link to="/wishlist" aria-label="Wishlist Link">

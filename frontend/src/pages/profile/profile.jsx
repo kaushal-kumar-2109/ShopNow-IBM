@@ -3,124 +3,283 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import Loader from "../../components/Loader";
 import "./profile.css";
-import { getUserData } from "../../api/getApiHandler/getData";
-
-const ADDRESS_KEY = "ShowNow_Addresses";
-const ORDERS_KEY = "ShowNow_Orders";
+import { getUserData, getAddresses, getOrdersList } from "../../api/getApiHandler/getData";
+import { apiUpdateProfile, apiAddAddress, apiUpdateAddress, apiDeleteAddress, apiCancelOrder, apiUpdateOrder } from "../../api/postApiHandler/pstData";
+import { clearSession } from "../../utils/checkUser";
 
 export default function Profile({ isUserLoged, setIsUserLoged }) {
   const [getUser, setUser] = useState({});
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const [addresses, setAddresses] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [displayName, setDisplayName] = useState("");
+
+  const [editingOrder, setEditingOrder] = useState(null);
+
+  const fetchAddresses = async () => {
+    try {
+      const res = await getAddresses();
+      if (res.flag && res.data) {
+        setAddresses(res.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const res = await getOrdersList();
+      if (res.flag && res.data) {
+        setOrders(res.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const getUserRecord = async () => {
     try {
       const res = await getUserData();
-      setUser(res.data);
+      if (res.flag && res.data) {
+        setUser(res.data);
+        setDisplayName(res.data.name || "");
+      }
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    getUserRecord();
     if (!isUserLoged) {
       navigate("/");
       return;
     }
-  }, []);
+    const initData = async () => {
+      await getUserRecord();
+      await fetchAddresses();
+      await fetchOrders();
+    };
+    initData();
+  }, [isUserLoged]);
 
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "overview";
   const [activeTab, setActiveTab] = useState(initialTab);
 
-  // ── Address State ────────────────────────────────────────────────────────────
-  const userKey = "guest";
-
-  const getAddresses = () => {
-    try {
-      const all = JSON.parse(localStorage.getItem(ADDRESS_KEY) || "{}");
-      return all[userKey] || [];
-    } catch { return []; }
-  };
-
-  const saveAddresses = (list) => {
-    try {
-      const all = JSON.parse(localStorage.getItem(ADDRESS_KEY) || "{}");
-      all[userKey] = list;
-      localStorage.setItem(ADDRESS_KEY, JSON.stringify(all));
-    } catch { }
-  };
-
-  const [addresses, setAddresses] = useState(getAddresses);
-
-  const getOrders = () => {
-    try {
-      const all = JSON.parse(localStorage.getItem(ORDERS_KEY) || "{}");
-      return all[userKey] || [];
-    } catch { return []; }
-  };
-  const [orders] = useState(getOrders);
-
-  // ── Address Form ─────────────────────────────────────────────────────────────
+  // Address Form State
   const emptyAddr = {
-    reciver: "", phone: "", addressLine1: "", addressLine2: "",
-    city: "", state: "", pincode: "", country: "India", addressType: "HOME", isDefault: false
+    reciver: "",
+    phone: "",
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    pincode: "",
+    country: "India",
+    addressType: "HOME",
+    isDefault: false,
   };
   const [addrForm, setAddrForm] = useState(emptyAddr);
   const [showAddrForm, setShowAddrForm] = useState(false);
+  const [editingAddressId, setEditingAddressId] = useState(null);
 
-  const handleAddrSubmit = (e) => {
+  const handleAddrSubmit = async (e) => {
     e.preventDefault();
     const required = ["reciver", "phone", "addressLine1", "city", "state", "pincode", "country"];
     for (const f of required) {
-      if (!addrForm[f].trim()) {
+      if (!addrForm[f].toString().trim()) {
         toast.error(`Please fill in "${f.replace(/([A-Z])/g, " $1")}"`);
         return;
       }
     }
-    const newAddr = { ...addrForm, id: Date.now().toString() };
-    const updated = [...addresses, newAddr];
-    setAddresses(updated);
-    saveAddresses(updated);
-    setAddrForm(emptyAddr);
-    setShowAddrForm(false);
-    toast.success("Address saved successfully!");
+
+    const payload = {
+      reciver: addrForm.reciver,
+      phone: addrForm.phone,
+      addressLine1: addrForm.addressLine1,
+      addressLine2: addrForm.addressLine2,
+      city: addrForm.city,
+      state: addrForm.state,
+      country: addrForm.country,
+      pincode: addrForm.pincode,
+      addressType: addrForm.addressType,
+      isDefault: addrForm.isDefault,
+    };
+
+    const isEditing = !!editingAddressId;
+    const toastId = toast.loading(isEditing ? "Updating address..." : "Saving address to account...");
+
+    try {
+      let res;
+      if (isEditing) {
+        res = await apiUpdateAddress(editingAddressId, payload);
+      } else {
+        res = await apiAddAddress(payload);
+      }
+
+      if (res.flag) {
+        toast.success(isEditing ? "Address updated successfully!" : "Address added successfully!", { id: toastId });
+        setAddrForm(emptyAddr);
+        setShowAddrForm(false);
+        setEditingAddressId(null);
+        fetchAddresses();
+      } else {
+        toast.error(res.message || "Failed to save address", { id: toastId });
+      }
+    } catch {
+      toast.error("Error saving address", { id: toastId });
+    }
   };
 
-  const handleDeleteAddr = (id) => {
-    const updated = addresses.filter(a => a.id !== id);
-    setAddresses(updated);
-    saveAddresses(updated);
-    toast.success("Address removed.");
+  const handleSetDefault = async (addr) => {
+    const toastId = toast.loading("Setting default address...");
+    try {
+      const res = await apiUpdateAddress(addr._id, {
+        reciver: addr.reciver,
+        phone: addr.phone,
+        addressLine1: addr.addressLine1,
+        addressLine2: addr.addressLine2,
+        city: addr.city,
+        state: addr.state,
+        country: addr.country,
+        pincode: addr.pincode,
+        addressType: addr.addressType,
+        isDefault: true,
+      });
+
+      if (res.flag) {
+        toast.success("Default address updated!", { id: toastId });
+        fetchAddresses();
+      } else {
+        toast.error(res.message || "Failed to set default address", { id: toastId });
+      }
+    } catch {
+      toast.error("Error setting default address", { id: toastId });
+    }
   };
 
-  // ── Settings State ────────────────────────────────────────────────────────────
-  const [displayName, setDisplayName] = useState("");
+  const handleStartEdit = (addr) => {
+    setEditingAddressId(addr._id);
+    setAddrForm({
+      reciver: addr.reciver,
+      phone: addr.phone,
+      addressLine1: addr.addressLine1,
+      addressLine2: addr.addressLine2 || "",
+      city: addr.city,
+      state: addr.state,
+      pincode: addr.pincode,
+      country: addr.country,
+      addressType: addr.addressType || "HOME",
+      isDefault: addr.default || false,
+    });
+    setShowAddrForm(true);
+  };
 
+  const handleDeleteAddr = async (id) => {
+    const toastId = toast.loading("Removing address...");
+    try {
+      const res = await apiDeleteAddress(id);
+      if (res.flag) {
+        toast.success("Address removed.", { id: toastId });
+        fetchAddresses();
+      } else {
+        toast.error(res.message || "Failed to remove address", { id: toastId });
+      }
+    } catch {
+      toast.error("Error removing address", { id: toastId });
+    }
+  };
 
-
-  const handleSettingsSave = (e) => {
+  const handleSettingsSave = async (e) => {
     e.preventDefault();
-    if (!displayName.trim()) { toast.error("Name cannot be empty."); return; }
+    if (!displayName.trim()) {
+      toast.error("Name cannot be empty.");
+      return;
+    }
     const toastId = toast.loading("Saving changes...");
-    toast.success("Profile updated!", { id: toastId });
+    try {
+      const res = await apiUpdateProfile({ name: displayName });
+      if (res.flag && res.data) {
+        toast.success("Profile updated!", { id: toastId });
+        setUser(res.data);
+      } else {
+        toast.error(res.message || "Failed to update profile", { id: toastId });
+      }
+    } catch {
+      toast.error("Error saving settings", { id: toastId });
+    }
   };
 
-  // ── Logout ────────────────────────────────────────────────────────────────────
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm("Are you sure you want to cancel this order?")) return;
+    const toastId = toast.loading("Cancelling order...");
+    try {
+      const res = await apiCancelOrder(orderId);
+      if (res.flag) {
+        toast.success("Order cancelled successfully!", { id: toastId });
+        fetchOrders();
+      } else {
+        toast.error(res.message || "Failed to cancel order", { id: toastId });
+      }
+    } catch {
+      toast.error("Error cancelling order", { id: toastId });
+    }
+  };
+
+  const handleStartUpdateOrder = (order) => {
+    const clonedItems = order.items.map((item) => ({ ...item }));
+    setEditingOrder({ ...order, items: clonedItems });
+  };
+
+  const handleEditItemField = (idx, field, value) => {
+    setEditingOrder((prev) => {
+      if (!prev) return null;
+      const updatedItems = [...prev.items];
+      updatedItems[idx] = { ...updatedItems[idx], [field]: value };
+      return { ...prev, items: updatedItems };
+    });
+  };
+
+  const handleSaveUpdatedOrder = async () => {
+    if (!editingOrder) return;
+    const toastId = toast.loading("Saving updated items...");
+    try {
+      const res = await apiUpdateOrder(editingOrder._id, { items: editingOrder.items });
+      if (res.flag) {
+        toast.success("Order updated successfully!", { id: toastId });
+        setEditingOrder(null);
+        fetchOrders();
+      } else {
+        toast.error(res.message || "Failed to update order", { id: toastId });
+      }
+    } catch {
+      toast.error("Error updating order", { id: toastId });
+    }
+  };
+
   const handleLogout = () => {
-    logoutUser();
+    clearSession();
     setIsUserLoged(false);
     toast.success("Logged out successfully!");
     navigate("/");
   };
 
-  // ── Order tracking ────────────────────────────────────────────────────────────
   const [expandedOrder, setExpandedOrder] = useState(null);
   const ORDER_STEPS = ["Placed", "Shipped", "Out for Delivery", "Delivered"];
 
   const renderTracker = (status) => {
     const idx = ORDER_STEPS.indexOf(status);
+    if (status === "Cancelled") {
+      return (
+        <div style={{ color: "#e53637", fontWeight: "700", display: "flex", alignItems: "center", gap: "8px" }}>
+          <i className="fa fa-times-circle" style={{ fontSize: "20px" }}></i>
+          Order Cancelled
+        </div>
+      );
+    }
     return (
       <div className="tracker">
         {ORDER_STEPS.map((step, i) => (
@@ -134,7 +293,6 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
     );
   };
 
-  // ── Tabs config ───────────────────────────────────────────────────────────────
   const tabs = [
     { id: "overview", icon: "fa-user", label: "Overview" },
     { id: "addresses", icon: "fa-map-marker", label: "Addresses" },
@@ -149,19 +307,19 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
   return (
     <div className="profile-page container spad">
       <div className="row">
-        {/* ── Sidebar ──────────────────────────────────────────────────────────── */}
+        {/* Sidebar */}
         <div className="col-lg-3 col-md-4">
           <div className="profile-sidebar">
             <div className="profile-avatar-card">
               <div className="profile-big-avatar">
-                {(getUser.name) ? getUser.name[0] : "SN"}
+                {getUser.name ? getUser.name[0].toUpperCase() : "SN"}
               </div>
               <h4>{getUser.name}</h4>
               <p>{getUser.email}</p>
             </div>
 
             <ul className="profile-nav">
-              {tabs.map(t => (
+              {tabs.map((t) => (
                 <li
                   key={t.id}
                   className={activeTab === t.id ? "active" : ""}
@@ -179,11 +337,10 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
           </div>
         </div>
 
-        {/* ── Content ──────────────────────────────────────────────────────────── */}
+        {/* Content */}
         <div className="col-lg-9 col-md-8">
           <div className="profile-content">
-
-            {/* ══ OVERVIEW ══════════════════════════════════════════════════════ */}
+            {/* OVERVIEW */}
             {activeTab === "overview" && (
               <div className="tab-content">
                 <h3 className="tab-heading">Account Overview</h3>
@@ -193,8 +350,7 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
                   {[
                     { label: "Full Name", value: getUser.name },
                     { label: "Email Address", value: getUser.email },
-                    { label: "Account Role", value: getUser.role },
-                    // { label: "Session Start", value: currentUser?.loginDate ? new Date(currentUser.loginDate).toLocaleString() : "—" },
+                    { label: "Account Role", value: getUser.role || "Customer" },
                   ].map((item, i) => (
                     <div key={i} className="info-box">
                       <span className="info-label">{item.label}</span>
@@ -216,7 +372,7 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
               </div>
             )}
 
-            {/* ══ ADDRESSES ═════════════════════════════════════════════════════ */}
+            {/* ADDRESSES */}
             {activeTab === "addresses" && (
               <div className="tab-content">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "8px" }}>
@@ -227,7 +383,13 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
                   <button
                     className="site-btn"
                     style={{ padding: "10px 18px", fontSize: "13px" }}
-                    onClick={() => setShowAddrForm(!showAddrForm)}
+                    onClick={() => {
+                      setShowAddrForm(!showAddrForm);
+                      if (showAddrForm) {
+                        setEditingAddressId(null);
+                        setAddrForm(emptyAddr);
+                      }
+                    }}
                   >
                     {showAddrForm ? "Cancel" : "+ Add Address"}
                   </button>
@@ -235,12 +397,12 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
 
                 {/* Address Cards */}
                 {addresses.length === 0 && !showAddrForm && (
-                  <p className="empty-msg">No addresses saved. Click &quot;+ Add Address&quot; to get started.</p>
+                  <p className="empty-msg">No addresses saved. Click "+ Add Address" to get started.</p>
                 )}
                 <div className="address-grid">
-                  {addresses.map(addr => (
-                    <div key={addr.id} className={`address-card ${addr.isDefault ? "default-card" : ""}`}>
-                      {addr.isDefault && <span className="default-badge">Default</span>}
+                  {addresses.map((addr) => (
+                    <div key={addr._id} className={`address-card ${addr.default ? "default-card" : ""}`}>
+                      {addr.default && <span className="default-badge">Default</span>}
                       <div className="addr-type-badge">{addr.addressType}</div>
                       <strong>{addr.reciver}</strong>
                       <p>{addr.addressLine1}</p>
@@ -248,30 +410,40 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
                       <p>{addr.city}, {addr.state} — {addr.pincode}</p>
                       <p>{addr.country}</p>
                       <p style={{ fontWeight: "600", marginTop: "8px" }}>📞 {addr.phone}</p>
-                      <button className="btn-remove" onClick={() => handleDeleteAddr(addr.id)}>
-                        Remove
-                      </button>
+                      <div style={{ display: "flex", gap: "10px", marginTop: "12px" }}>
+                        <button className="site-btn" style={{ padding: "6px 12px", fontSize: "11px", backgroundColor: "#333" }} onClick={() => handleStartEdit(addr)}>
+                          Edit
+                        </button>
+                        {!addr.default && (
+                          <button className="site-btn" style={{ padding: "6px 12px", fontSize: "11px", backgroundColor: "#666" }} onClick={() => handleSetDefault(addr)}>
+                            Set Default
+                          </button>
+                        )}
+                        <button className="btn-remove" style={{ marginLeft: "auto", alignSelf: "center" }} onClick={() => handleDeleteAddr(addr._id)}>
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Add Address Form */}
+                {/* Add/Edit Address Form */}
                 {showAddrForm && (
                   <form onSubmit={handleAddrSubmit} className="addr-form">
-                    <h4 style={{ marginBottom: "20px", fontWeight: "700" }}>New Address</h4>
+                    <h4 style={{ marginBottom: "20px", fontWeight: "700" }}>{editingAddressId ? "Edit Address" : "New Address"}</h4>
                     <div className="row">
                       <div className="col-md-6 form-group">
                         <label>Receiver Name *</label>
-                        <input value={addrForm.reciver} onChange={e => setAddrForm({ ...addrForm, reciver: e.target.value })} placeholder="e.g. John Doe" />
+                        <input value={addrForm.reciver} onChange={e => setAddrForm({ ...addrForm, reciver: e.target.value })} placeholder="e.g. John Doe" required />
                       </div>
                       <div className="col-md-6 form-group">
                         <label>Phone *</label>
-                        <input value={addrForm.phone} onChange={e => setAddrForm({ ...addrForm, phone: e.target.value })} placeholder="e.g. +91 9876543210" />
+                        <input value={addrForm.phone} onChange={e => setAddrForm({ ...addrForm, phone: e.target.value })} placeholder="e.g. +91 9876543210" required />
                       </div>
                     </div>
                     <div className="form-group">
                       <label>Address Line 1 *</label>
-                      <input value={addrForm.addressLine1} onChange={e => setAddrForm({ ...addrForm, addressLine1: e.target.value })} placeholder="Street, House No." />
+                      <input value={addrForm.addressLine1} onChange={e => setAddrForm({ ...addrForm, addressLine1: e.target.value })} placeholder="Street, House No." required />
                     </div>
                     <div className="form-group">
                       <label>Address Line 2</label>
@@ -280,21 +452,21 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
                     <div className="row">
                       <div className="col-md-4 form-group">
                         <label>City *</label>
-                        <input value={addrForm.city} onChange={e => setAddrForm({ ...addrForm, city: e.target.value })} placeholder="City" />
+                        <input value={addrForm.city} onChange={e => setAddrForm({ ...addrForm, city: e.target.value })} placeholder="City" required />
                       </div>
                       <div className="col-md-4 form-group">
                         <label>State *</label>
-                        <input value={addrForm.state} onChange={e => setAddrForm({ ...addrForm, state: e.target.value })} placeholder="State" />
+                        <input value={addrForm.state} onChange={e => setAddrForm({ ...addrForm, state: e.target.value })} placeholder="State" required />
                       </div>
                       <div className="col-md-4 form-group">
                         <label>Pincode *</label>
-                        <input value={addrForm.pincode} onChange={e => setAddrForm({ ...addrForm, pincode: e.target.value })} placeholder="110001" />
+                        <input value={addrForm.pincode} onChange={e => setAddrForm({ ...addrForm, pincode: e.target.value })} placeholder="110001" required />
                       </div>
                     </div>
                     <div className="row">
                       <div className="col-md-6 form-group">
                         <label>Country *</label>
-                        <input value={addrForm.country} onChange={e => setAddrForm({ ...addrForm, country: e.target.value })} />
+                        <input value={addrForm.country} onChange={e => setAddrForm({ ...addrForm, country: e.target.value })} required />
                       </div>
                       <div className="col-md-6 form-group">
                         <label>Type</label>
@@ -309,33 +481,39 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
                       <input type="checkbox" id="defAddr" checked={addrForm.isDefault} onChange={e => setAddrForm({ ...addrForm, isDefault: e.target.checked })} style={{ width: "16px", height: "16px", cursor: "pointer" }} />
                       <label htmlFor="defAddr" style={{ cursor: "pointer", marginBottom: 0 }}>Set as default address</label>
                     </div>
-                    <button type="submit" className="site-btn" style={{ marginTop: "10px" }}>Save Address</button>
+                    <button type="submit" className="site-btn" style={{ marginTop: "10px" }}>{editingAddressId ? "Save Changes" : "Save Address"}</button>
                   </form>
                 )}
               </div>
             )}
 
-            {/* ══ ORDERS ════════════════════════════════════════════════════════ */}
+            {/* ORDERS */}
             {activeTab === "orders" && (
               <div className="tab-content">
                 <h3 className="tab-heading">Order History & Tracking</h3>
-                <p className="tab-sub">All your past purchases</p>
+                <p className="tab-sub">All your purchases</p>
 
                 {orders.length === 0 ? (
                   <p className="empty-msg">No orders yet. Start shopping! 🛍️</p>
                 ) : (
                   <div className="orders-list">
-                    {orders.map(order => {
-                      const open = expandedOrder === order.id;
+                    {orders.map((order) => {
+                      const open = expandedOrder === order._id;
                       return (
-                        <div key={order.id} className="order-item">
-                          <div className="order-header" onClick={() => setExpandedOrder(open ? null : order.id)}>
+                        <div key={order._id} className="order-item">
+                          <div className="order-header" onClick={() => setExpandedOrder(open ? null : order._id)}>
                             <div>
-                              <div className="order-id">#{order.id}</div>
-                              <div className="order-date">{order.date}</div>
+                              <div className="order-id">#{order._id}</div>
+                              <div className="order-date">
+                                {new Date(order.created_at || order.createdAt).toLocaleDateString("en-US", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric",
+                                })}
+                              </div>
                             </div>
                             <div className="order-meta">
-                              <span className="order-total">${order.total?.toFixed(2)}</span>
+                              <span className="order-total">${order.totalAmount?.toFixed(2)}</span>
                               <span className={`status-pill ${order.status?.toLowerCase().replace(/ /g, "-")}`}>
                                 {order.status}
                               </span>
@@ -353,10 +531,11 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
                               <div className="row">
                                 <div className="col-md-6">
                                   <h5>Shipping To</h5>
-                                  <p><b>{order.billing?.firstName} {order.billing?.lastName}</b></p>
-                                  <p>{order.billing?.address}</p>
-                                  <p>{order.billing?.city}, {order.billing?.state} {order.billing?.postcode}</p>
-                                  <p>📞 {order.billing?.phone}</p>
+                                  <p><b>{order.billingAddress?.reciver}</b></p>
+                                  <p>{order.billingAddress?.addressLine1}</p>
+                                  <p>{order.billingAddress?.city}, {order.billingAddress?.state} - {order.billingAddress?.pincode}</p>
+                                  <p>{order.billingAddress?.country}</p>
+                                  <p>📞 {order.billingAddress?.phone}</p>
                                 </div>
                                 <div className="col-md-6">
                                   <h5>Payment</h5>
@@ -371,24 +550,66 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
                                     <thead>
                                       <tr>
                                         <th>Product</th>
-                                        <th>Size</th>
+                                        <th>Details</th>
                                         <th>Qty</th>
-                                        <th>Total</th>
+                                        <th style={{ textAlign: "right" }}>Total</th>
                                       </tr>
                                     </thead>
                                     <tbody>
                                       {order.items.map((item, i) => (
                                         <tr key={i}>
-                                          <td>{item.product?.name}</td>
-                                          <td>{item.size}</td>
+                                          <td style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                            <img
+                                              src={item.image}
+                                              alt={item.title}
+                                              width="50"
+                                              style={{ borderRadius: "4px", objectFit: "cover" }}
+                                            />
+                                            <span style={{ fontWeight: "600" }}>{item.title}</span>
+                                          </td>
+                                          <td>
+                                            {[
+                                              item.size && `Size: ${item.size}`,
+                                              item.color && `Color: ${item.color}`,
+                                            ]
+                                              .filter(Boolean)
+                                              .join(" / ") || "—"}
+                                          </td>
                                           <td>{item.quantity}</td>
-                                          <td>${(item.product?.price * item.quantity).toFixed(2)}</td>
+                                          <td style={{ textAlign: "right", fontWeight: "700" }}>
+                                            ${(item.price * item.quantity).toFixed(2)}
+                                          </td>
                                         </tr>
                                       ))}
                                     </tbody>
                                   </table>
                                 </>
                               )}
+
+                              {/* Cancel and Update order controls */}
+                              {order.status !== "Cancelled" && (
+                                <div style={{ display: "flex", gap: "10px", marginTop: "20px", borderTop: "1px solid #eee", paddingTop: "15px" }}>
+                                  {order.status === "Placed" && (
+                                    <button
+                                      className="site-btn"
+                                      style={{ padding: "8px 16px", fontSize: "12px", backgroundColor: "#111" }}
+                                      onClick={() => handleStartUpdateOrder(order)}
+                                    >
+                                      Update Items
+                                    </button>
+                                  )}
+                                  {(order.status === "Placed" || order.status === "Shipped") && (
+                                    <button
+                                      className="site-btn"
+                                      style={{ padding: "8px 16px", fontSize: "12px", backgroundColor: "#e53637" }}
+                                      onClick={() => handleCancelOrder(order._id)}
+                                    >
+                                      Cancel Order
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+
                             </div>
                           )}
                         </div>
@@ -399,7 +620,7 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
               </div>
             )}
 
-            {/* ══ SETTINGS ══════════════════════════════════════════════════════ */}
+            {/* SETTINGS */}
             {activeTab === "settings" && (
               <div className="tab-content">
                 <h3 className="tab-heading">Settings</h3>
@@ -414,8 +635,8 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
                     <label>Display Name *</label>
                     <input
                       type="text"
-                      value={getUser.name}
-                      onChange={e => setDisplayName(e.target.value)}
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
                       placeholder="Your full name"
                       required
                     />
@@ -424,10 +645,132 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
                 </form>
               </div>
             )}
-
           </div>
         </div>
       </div>
+
+      {/* Dynamic Inline Update Order Editor Modal */}
+      {editingOrder && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+            padding: "15px"
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#fff",
+              padding: "30px",
+              borderRadius: "6px",
+              maxWidth: "600px",
+              width: "100%",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              boxShadow: "0 5px 25px rgba(0,0,0,0.15)"
+            }}
+          >
+            <h4 style={{ fontWeight: "700", marginBottom: "10px" }}>Update Order Items</h4>
+            <p style={{ color: "#666", fontSize: "14px", marginBottom: "25px" }}>Order: #{editingOrder._id}</p>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px", marginBottom: "30px" }}>
+              {editingOrder.items.map((item, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex",
+                    gap: "15px",
+                    borderBottom: "1px solid #eee",
+                    paddingBottom: "15px",
+                    alignItems: "center"
+                  }}
+                >
+                  <img
+                    src={item.image.startsWith("http") ? item.image : `http://localhost:5173${item.image.startsWith("/") ? "" : "/"}${item.image}`}
+                    alt={item.title}
+                    width="60"
+                    style={{ borderRadius: "4px", objectFit: "cover" }}
+                  />
+                  <div style={{ flex: 1 }}>
+                    <h6 style={{ fontWeight: "700", margin: "0 0 8px 0" }}>{item.title}</h6>
+                    <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                      {/* Size selection */}
+                      <div>
+                        <label style={{ fontSize: "12px", display: "block", marginBottom: "4px" }}>Size</label>
+                        <select
+                          value={item.size}
+                          onChange={(e) => handleEditItemField(idx, "size", e.target.value)}
+                          style={{ height: "30px", border: "1px solid #e1e1e1", fontSize: "13px", padding: "0 5px" }}
+                        >
+                          <option value="S">S</option>
+                          <option value="M">M</option>
+                          <option value="L">L</option>
+                          <option value="XL">XL</option>
+                          <option value="OS">OS</option>
+                        </select>
+                      </div>
+
+                      {/* Color selection */}
+                      <div>
+                        <label style={{ fontSize: "12px", display: "block", marginBottom: "4px" }}>Color</label>
+                        <select
+                          value={item.color}
+                          onChange={(e) => handleEditItemField(idx, "color", e.target.value)}
+                          style={{ height: "30px", border: "1px solid #e1e1e1", fontSize: "13px", padding: "0 5px" }}
+                        >
+                          <option value="#111111">Black</option>
+                          <option value="#ffffff">White</option>
+                          <option value="#a8a8a8">Grey</option>
+                          <option value="#2d4c7a">Blue</option>
+                          <option value="#4a3319">Brown</option>
+                        </select>
+                      </div>
+
+                      {/* Quantity selection */}
+                      <div>
+                        <label style={{ fontSize: "12px", display: "block", marginBottom: "4px" }}>Qty</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(e) => handleEditItemField(idx, "quantity", parseInt(e.target.value) || 1)}
+                          style={{ width: "60px", height: "30px", border: "1px solid #e1e1e1", textAlign: "center", fontSize: "13px" }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button
+                className="site-btn"
+                style={{ backgroundColor: "#666", padding: "10px 20px" }}
+                onClick={() => setEditingOrder(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="site-btn"
+                style={{ padding: "10px 20px" }}
+                onClick={handleSaveUpdatedOrder}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

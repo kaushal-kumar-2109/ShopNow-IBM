@@ -1,17 +1,30 @@
 const Product = require("../../db/models/product.model.js");
 const Comment = require("../../db/models/comments.model.js");
 
-/* ── GET latest / filtered products (landing page) ───────────────────── */
+/* ── GET latest / filtered products (landing page / shop page) ────────── */
 const GetLanProduct = async (req, res) => {
     try {
-        const { category, limit = 8 } = req.query;
+        const { category } = req.query;
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 8;
+        const skip = (page - 1) * limit;
+
         const filter = {};
         if (category) filter.category = category;
-        const product = await Product.find(filter).sort({ createdAt: -1 }).limit(Number(limit));
-        if (!product || product.length === 0) {
-            return res.status(404).json({ data: { message: "No products found" }, status: false });
-        }
-        return res.status(200).json({ message: "Products found", data: product });
+
+        // Perform parallel queries for paginated items and total document count
+        const [product, total] = await Promise.all([
+            Product.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+            Product.countDocuments(filter)
+        ]);
+
+        return res.status(200).json({
+            message: "Products found",
+            data: product,
+            total,
+            page,
+            totalPages: Math.ceil(total / limit)
+        });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ message: "Internal server error", error: err });

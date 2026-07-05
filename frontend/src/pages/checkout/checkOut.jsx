@@ -3,22 +3,24 @@ import { Link, useNavigate } from "react-router-dom";
 import { useShop } from "../../context/ShopContext";
 import { motion } from "framer-motion";
 import Loader from "../../components/Loader";
+import toast from "react-hot-toast";
+import { getUserData, getAddresses } from "../../api/getApiHandler/getData";
+import { apiAddAddress, apiPlaceOrder } from "../../api/postApiHandler/pstData";
 
-export default function CheckOut({ isUserLoged, setIsUserLoged }) {
+export default function CheckOut({ isUserLoged }) {
   const { cart, getCartTotal, clearCart } = useShop();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  // Saved Addresses State
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState(null);
 
   // Form State
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    country: "United States",
+    country: "India",
     address: "",
     city: "",
     state: "",
@@ -31,24 +33,199 @@ export default function CheckOut({ isUserLoged, setIsUserLoged }) {
   const [paymentMethod, setPaymentMethod] = useState("cod"); // cod, paypal, card
   const [isOrdered, setIsOrdered] = useState(false);
 
+  const fillFormWithAddress = (addr, email, name) => {
+    let first = name || "";
+    let last = "";
+    if (addr.reciver) {
+      const parts = addr.reciver.trim().split(" ");
+      first = parts[0] || "";
+      last = parts.slice(1).join(" ") || "";
+    }
+    const street = (addr.addressLine1 + (addr.addressLine2 ? `, ${addr.addressLine2}` : "")).trim();
+    setFormData({
+      firstName: first,
+      lastName: last,
+      country: addr.country || "India",
+      address: street,
+      city: addr.city || "",
+      state: addr.state || "",
+      postcode: addr.pincode || "",
+      phone: addr.phone || "",
+      email: email || formData.email || "",
+      orderNotes: formData.orderNotes || ""
+    });
+  };
+
+  useEffect(() => {
+    const fetchStoredData = async () => {
+      setLoading(true);
+      if (isUserLoged) {
+        let userEmail = "";
+        let userName = "";
+
+        // Fetch User Info
+        const userRes = await getUserData();
+        if (userRes.flag && userRes.data) {
+          userEmail = userRes.data.email || "";
+          userName = userRes.data.name || "";
+          setFormData((prev) => ({ ...prev, email: userEmail }));
+        }
+
+        // Fetch saved addresses
+        const addrRes = await getAddresses();
+        if (addrRes.flag && addrRes.data) {
+          setSavedAddresses(addrRes.data);
+          const defAddr = addrRes.data.find(a => a.default);
+          if (defAddr) {
+            setSelectedAddress(defAddr);
+            fillFormWithAddress(defAddr, userEmail, userName);
+          } else if (addrRes.data.length > 0) {
+            setSelectedAddress(addrRes.data[0]);
+            fillFormWithAddress(addrRes.data[0], userEmail, userName);
+          }
+        }
+      }
+      setLoading(false);
+    };
+    fetchStoredData();
+  }, [isUserLoged]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (cart.length === 0) {
-      alert("Your cart is empty. Please add products before placing an order.");
+  const handleAddressSelect = (addrId) => {
+    if (!addrId) {
+      setSelectedAddress(null);
+      setFormData({
+        firstName: "",
+        lastName: "",
+        country: "India",
+        address: "",
+        city: "",
+        state: "",
+        postcode: "",
+        phone: "",
+        email: formData.email,
+        orderNotes: formData.orderNotes
+      });
       return;
     }
-    // Simple verification check
+    const addr = savedAddresses.find(a => a._id === addrId);
+    if (addr) {
+      setSelectedAddress(addr);
+      fillFormWithAddress(addr, formData.email, "");
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (cart.length === 0) {
+      toast.error("Your cart is empty. Please add products before placing an order.");
+      return;
+    }
+
     setIsOrdered(true);
-    setTimeout(() => {
-      alert(`Order placed successfully! Thank you for shopping with us, ${formData.firstName}.`);
-      clearCart();
-      navigate("/");
-    }, 2000);
+
+    if (isUserLoged) {
+      // Check if the entered address matches ANY of the user's saved addresses in the database
+      const formFullName = `${formData.firstName} ${formData.lastName}`.trim().toLowerCase();
+      const formStreet = formData.address.trim().toLowerCase();
+      const formCity = formData.city.trim().toLowerCase();
+      const formState = formData.state.trim().toLowerCase();
+      const formCountry = formData.country.trim().toLowerCase();
+      const formPostcode = formData.postcode.trim();
+      const formPhone = formData.phone.trim();
+
+      const existingMatch = savedAddresses.find((addr) => {
+        const dbReciver = addr.reciver.trim().toLowerCase();
+        const dbStreet = (addr.addressLine1 + (addr.addressLine2 ? `, ${addr.addressLine2}` : "")).trim().toLowerCase();
+        const dbCity = addr.city.trim().toLowerCase();
+        const dbState = addr.state.trim().toLowerCase();
+        const dbCountry = addr.country.trim().toLowerCase();
+        
+        return (
+          dbReciver === formFullName &&
+          dbStreet === formStreet &&
+          dbCity === formCity &&
+          dbState === formState &&
+          dbCountry === formCountry &&
+          addr.pincode.trim() === formPostcode &&
+          addr.phone.trim() === formPhone
+        );
+      });
+
+      const isNew = !existingMatch;
+
+      if (isNew) {
+        // Automatically save as a new address for the user in the database
+        try {
+          await apiAddAddress({
+            reciver: `${formData.firstName} ${formData.lastName}`.trim(),
+            addressLine1: formData.address,
+            city: formData.city,
+            state: formData.state,
+            country: formData.country,
+            pincode: formData.postcode,
+            phone: formData.phone,
+            addressType: "OTHER",
+            isDefault: false
+          });
+          toast.success("New address automatically saved to your profile.");
+        } catch (err) {
+          console.error("Failed to auto-save new address:", err);
+        }
+      }
+
+      // Map cart items to backend schema format safely filtering out any null/undefined products
+      const validItems = cart.filter((item) => item && item.product);
+      const orderItems = validItems.map((item) => ({
+        product_id: item.product._id,
+        title: item.product.title || item.product.name || "Product",
+        image: item.product.images?.[0]?.url || "",
+        price: item.product.discountPrice ?? item.product.price ?? 0,
+        quantity: item.quantity,
+        size: item.size || "",
+        color: item.color || ""
+      }));
+
+      // Submit order details to database
+      try {
+        const orderRes = await apiPlaceOrder({
+          items: orderItems,
+          billingAddress: {
+            reciver: `${formData.firstName} ${formData.lastName}`.trim(),
+            addressLine1: formData.address,
+            city: formData.city,
+            state: formData.state,
+            country: formData.country,
+            pincode: formData.postcode,
+            phone: formData.phone
+          },
+          totalAmount: subtotal,
+          paymentMethod
+        });
+
+        if (orderRes.flag) {
+          toast.success("Order placed successfully!");
+          clearCart();
+          setTimeout(() => {
+            navigate("/profile?tab=orders");
+          }, 1500);
+        } else {
+          toast.error(orderRes.message || "Failed to place order. Please try again.");
+          setIsOrdered(false);
+        }
+      } catch (err) {
+        console.error("Order API execution error:", err);
+        toast.error(`Order Placement Error: ${err.message || "Server Error"}`);
+        setIsOrdered(false);
+      }
+    } else {
+      toast.error("Please login to place an order.");
+      setIsOrdered(false);
+    }
   };
 
   const subtotal = getCartTotal();
@@ -104,6 +281,35 @@ export default function CheckOut({ isUserLoged, setIsUserLoged }) {
               {/* Billing Forms Column */}
               <div className="col-lg-8 col-md-6">
                 <h5 className="checkout__title">Billing Details</h5>
+
+                {/* Stored Address Selector Dropdown */}
+                {isUserLoged && savedAddresses.length > 0 && (
+                  <div className="checkout__input" style={{ marginBottom: "25px", border: "1px solid #e1e1e1", padding: "20px", borderRadius: "4px", backgroundColor: "#fafafa" }}>
+                    <p style={{ fontWeight: "700", marginBottom: "10px", color: "#111" }}>Deliver to saved address:</p>
+                    <select
+                      value={selectedAddress ? selectedAddress._id : ""}
+                      onChange={(e) => handleAddressSelect(e.target.value)}
+                      style={{
+                        width: "100%",
+                        height: "45px",
+                        border: "1px solid #e1e1e1",
+                        paddingLeft: "15px",
+                        fontSize: "14px",
+                        outline: "none",
+                        cursor: "pointer",
+                        borderRadius: "2px"
+                      }}
+                    >
+                      <option value="">-- Add a custom/new address --</option>
+                      {savedAddresses.map((addr) => (
+                        <option key={addr._id} value={addr._id}>
+                          {addr.reciver} - {addr.addressLine1}, {addr.city} ({addr.addressType}) {addr.default ? "[DEFAULT]" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 <div className="row">
                   <div className="col-lg-6">
                     <div className="checkout__input">
@@ -256,14 +462,16 @@ export default function CheckOut({ isUserLoged, setIsUserLoged }) {
                     {cart.length === 0 ? (
                       <li style={{ fontSize: "14px", color: "#888" }}>No products in cart</li>
                     ) : (
-                      cart.map((item, idx) => (
-                        <li key={idx} style={{ fontSize: "14px", display: "flex", justifyContent: "space-between" }}>
-                          <span>
-                            {idx + 1}. {item.product.name} (x{item.quantity})
-                          </span>
-                          <span>${(item.product.price * item.quantity).toFixed(2)}</span>
-                        </li>
-                      ))
+                      cart
+                        .filter((item) => item && item.product)
+                        .map((item, idx) => (
+                          <li key={idx} style={{ fontSize: "14px", display: "flex", justifyContent: "space-between" }}>
+                            <span>
+                              {idx + 1}. {item.product.title || item.product.name} (x{item.quantity})
+                            </span>
+                            <span>${((item.product.discountPrice ?? item.product.price) * item.quantity).toFixed(2)}</span>
+                          </li>
+                        ))
                     )}
                   </ul>
                   <div className="checkout__total__all">

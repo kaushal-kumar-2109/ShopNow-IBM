@@ -41,4 +41,32 @@ const apiToggleWishlist = async (data) => {
     return await PostDataCall(ROUTERS.POST_ROUTE.toggleWishlist, data);
 }
 
-export { sendOtp, createUser, setUser, updateUserPassword, postComment, apiAddToCart, apiUpdateCartQuantity, apiRemoveFromCart, apiClearCart, apiToggleWishlist };
+const apiUpdateProfile = async (data) => {
+    return await PostDataCall(ROUTERS.POST_ROUTE.updateProfile, data);
+}
+
+const apiAddAddress = async (data) => {
+    return await PostDataCall(ROUTERS.POST_ROUTE.addAddress, data);
+}
+
+const apiUpdateAddress = async (id, data) => {
+    return await PostDataCall(`${ROUTERS.POST_ROUTE.updateAddress}/${id}`, data);
+}
+
+const apiDeleteAddress = async (id) => {
+    return await PostDataCall(`${ROUTERS.POST_ROUTE.deleteAddress}/${id}`, {});
+}
+
+const apiPlaceOrder = async (data) => {
+    return await PostDataCall(ROUTERS.POST_ROUTE.placeOrder, data);
+}
+
+const apiCancelOrder = async (id) => {
+    return await PostDataCall(`${ROUTERS.POST_ROUTE.cancelOrder}/${id}`, {});
+}
+
+const apiUpdateOrder = async (id, data) => {
+    return await PostDataCall(`${ROUTERS.POST_ROUTE.updateOrder}/${id}`, data);
+}
+
+export { sendOtp, createUser, setUser, updateUserPassword, postComment, apiAddToCart, apiUpdateCartQuantity, apiRemoveFromCart, apiClearCart, apiToggleWishlist, apiUpdateProfile, apiAddAddress, apiUpdateAddress, apiDeleteAddress, apiPlaceOrder, apiCancelOrder, apiUpdateOrder };

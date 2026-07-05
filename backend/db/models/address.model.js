@@ -12,8 +12,7 @@ const AddressSchema = mongoose.Schema({
     },
     addressLine1: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     addressLine2: {
         type: String,
@@ -65,4 +64,19 @@ const AddressSchema = mongoose.Schema({
 })
 
 const Address = mongoose.model("Address", AddressSchema);
+
+// Drop unique index if it exists in the database
+mongoose.connection.on('connected', () => {
+    mongoose.connection.db.collection('addresses').dropIndex('addressLine1_1')
+        .then(() => console.log('Successfully dropped addressLine1 unique index'))
+        .catch(err => {
+            // Index might not exist or already dropped
+        });
+});
+
+// Also run immediately if database is already connected
+if (mongoose.connection.readyState === 1) {
+    mongoose.connection.db.collection('addresses').dropIndex('addressLine1_1').catch(() => {});
+}
+
 module.exports = Address;

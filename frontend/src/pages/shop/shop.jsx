@@ -1,19 +1,21 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { PRODUCTS, CATEGORIES } from "../../mock/mockData";
 import { useShop } from "../../context/ShopContext";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "../../components/Loader";
+import { getAllShopProducts } from "../../api/getApiHandler/getData";
 
-export default function Shop({ isUserLoged, setIsUserLoged }) {
+const CATEGORIES = ["All", "men's clothing", "jewelery", "electronics", "women's clothing"];
+
+export default function Shop() {
   const { addToCart, toggleWishlist, isInWishlist, isCartLoading, isWishlistLoading } = useShop();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
 
   // Filter States
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -26,11 +28,29 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
   // Get search query from URL (e.g., from header search modal redirect)
   const urlSearch = searchParams.get("search") || "";
 
+  // Fetch products from server on mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      const res = await getAllShopProducts(1, 100); // fetch up to 100 products
+      if (res.flag && res.data) {
+        setProducts(res.data);
+      }
+      setLoading(false);
+    };
+    fetchProducts();
+  }, []);
+
   useEffect(() => {
     if (urlSearch) {
       setLocalSearch(urlSearch);
     }
   }, [urlSearch]);
+
+  // Reset currentPage to 1 when filters are adjusted
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, selectedPriceRange, selectedSize, selectedColor, sortBy, localSearch]);
 
   const priceRanges = [
     { label: "All", min: 0, max: 10000 },
@@ -62,21 +82,26 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
   };
 
   // Filter & Sort Logic
-  const filteredProducts = PRODUCTS.filter((product) => {
+  const filteredProducts = products.filter((product) => {
+    const title = product.title || "";
+    const description = product.description || "";
+    const category = product.category || "";
+
     // 1. Search Query Match
     const matchesSearch =
-      product.name.toLowerCase().includes(localSearch.toLowerCase()) ||
-      product.description.toLowerCase().includes(localSearch.toLowerCase());
+      title.toLowerCase().includes(localSearch.toLowerCase()) ||
+      description.toLowerCase().includes(localSearch.toLowerCase());
 
     // 2. Category Match
     const matchesCategory =
-      selectedCategory === "All" || product.category === selectedCategory;
+      selectedCategory === "All" || category.toLowerCase() === selectedCategory.toLowerCase();
 
     // 3. Price Range Match
     const activePriceObj = priceRanges.find((r) => r.label === selectedPriceRange);
+    const activePrice = product.discountPrice ?? product.price;
     const matchesPrice =
       !activePriceObj ||
-      (product.price >= activePriceObj.min && product.price <= activePriceObj.max);
+      (activePrice >= activePriceObj.min && activePrice <= activePriceObj.max);
 
     // 4. Size Match
     const matchesSize =
@@ -90,11 +115,23 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
 
     return matchesSearch && matchesCategory && matchesPrice && matchesSize && matchesColor;
   }).sort((a, b) => {
-    if (sortBy === "priceLowHigh") return a.price - b.price;
-    if (sortBy === "priceHighLow") return b.price - a.price;
-    if (sortBy === "nameAsc") return a.name.localeCompare(b.name);
+    const priceA = a.discountPrice ?? a.price;
+    const priceB = b.discountPrice ?? b.price;
+    const titleA = a.title || "";
+    const titleB = b.title || "";
+
+    if (sortBy === "priceLowHigh") return priceA - priceB;
+    if (sortBy === "priceHighLow") return priceB - priceA;
+    if (sortBy === "nameAsc") return titleA.localeCompare(titleB);
     return 0; // default order
   });
+
+  // Calculate paginated slice
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   if (loading) {
     return <Loader />;
@@ -148,7 +185,7 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                   {/* Category Filter */}
                   <div className="card">
                     <div className="card-heading">
-                      <a href="#">Categories</a>
+                      <span style={{ fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", fontSize: "14px" }}>Categories</span>
                     </div>
                     <div className="card-body">
                       <div className="shop__sidebar__categories">
@@ -157,13 +194,14 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                             <li key={cat}>
                               <a
                                 href="#"
-                                className={selectedCategory === cat ? "active" : ""}
+                                className={selectedCategory.toLowerCase() === cat.toLowerCase() ? "active" : ""}
                                 onClick={(e) => {
                                   e.preventDefault();
                                   setSelectedCategory(cat);
                                 }}
+                                style={{ textTransform: "capitalize" }}
                               >
-                                {cat}
+                                {cat === "All" ? "All Categories" : cat}
                               </a>
                             </li>
                           ))}
@@ -175,7 +213,7 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                   {/* Price Filter */}
                   <div className="card">
                     <div className="card-heading">
-                      <a href="#">Filter Price</a>
+                      <span style={{ fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", fontSize: "14px" }}>Filter Price</span>
                     </div>
                     <div className="card-body">
                       <div className="shop__sidebar__price">
@@ -202,7 +240,7 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                   {/* Size Filter */}
                   <div className="card">
                     <div className="card-heading">
-                      <a href="#">Filter Sizes</a>
+                      <span style={{ fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", fontSize: "14px" }}>Filter Sizes</span>
                     </div>
                     <div className="card-body">
                       <div className="shop__sidebar__size">
@@ -222,7 +260,7 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                   {/* Color Filter */}
                   <div className="card">
                     <div className="card-heading">
-                      <a href="#">Filter Colors</a>
+                      <span style={{ fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", fontSize: "14px" }}>Filter Colors</span>
                     </div>
                     <div className="card-body">
                       <div className="shop__sidebar__color">
@@ -280,7 +318,7 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                   <div className="col-lg-6 col-md-6 col-sm-6">
                     <div className="shop__product__option__left">
                       <p>
-                        Showing {filteredProducts.length} of {PRODUCTS.length} results
+                        Showing {(currentPage - 1) * itemsPerPage + 1}–{Math.min(currentPage * itemsPerPage, filteredProducts.length)} of {filteredProducts.length} results
                       </p>
                     </div>
                   </div>
@@ -300,45 +338,50 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
 
               {/* Product Grid */}
               <motion.div className="row" layout>
-                {filteredProducts.length === 0 ? (
+                {paginatedProducts.length === 0 ? (
                   <div className="col-lg-12" style={{ textAlign: "center", padding: "100px 0" }}>
                     <h3 style={{ marginBottom: "15px", fontWeight: "700" }}>No products found</h3>
                     <p>Try adjusting your search query or filter checkboxes.</p>
                   </div>
                 ) : (
-                  <AnimatePresence>
-                    {filteredProducts.map((product) => {
+                  <AnimatePresence mode="popLayout">
+                    {paginatedProducts.map((product) => {
                       const isFavorite = isInWishlist(product);
+                      const displayPrice = product.discountPrice ?? product.price;
+                      const hasDiscount = !!product.discountPrice;
+                      const pImage = product.images?.[0]?.url || "";
+                      const productId = product._id;
+
                       return (
                         <motion.div
-                          key={product.id}
+                          key={productId}
                           className="col-lg-4 col-md-6 col-sm-6"
                           layout
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.3 }}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          transition={{ duration: 0.2 }}
                         >
                           <div className="product__item">
                             <div className="product__item__pic">
-                              <Link to={`/shop/${product.id}`} style={{ display: "block", height: "100%" }}>
+                              <Link to={`/shop/${productId}`} style={{ display: "block", height: "100%" }}>
                                 <motion.img
-                                  src={product.mainImage}
-                                  alt={product.name}
+                                  src={pImage}
+                                  alt={product.title}
                                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                   whileHover={{ scale: 1.05 }}
                                 />
                               </Link>
-                              {product.newArrival && <span className="label">New</span>}
-                              {product.hotSale && <span className="label sale">Sale</span>}
+                              {product.isFeatured && <span className="label">Featured</span>}
+                              {hasDiscount && <span className="label sale">Sale</span>}
 
                               <ul className="product__hover">
                                  <li>
                                   <button
                                     onClick={() => toggleWishlist(product)}
-                                    style={{ border: "none", background: "none", opacity: isWishlistLoading(product._id || product.id) ? 0.6 : 1 }}
+                                    style={{ border: "none", background: "none", opacity: isWishlistLoading(productId) ? 0.6 : 1 }}
                                     aria-label="Wishlist toggle"
-                                    disabled={isWishlistLoading(product._id || product.id)}
+                                    disabled={isWishlistLoading(productId)}
                                   >
                                     <a className={isFavorite ? "active" : ""}>
                                       <img
@@ -346,12 +389,12 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                                         alt="Wishlist"
                                         style={{ filter: isFavorite ? "hue-rotate(320deg) saturate(3)" : "none" }}
                                       />
-                                      <span>{isWishlistLoading(product._id || product.id) ? "Loading..." : (isFavorite ? "Liked" : "Add to Wishlist")}</span>
+                                      <span>{isWishlistLoading(productId) ? "Loading..." : (isFavorite ? "Liked" : "Add to Wishlist")}</span>
                                     </a>
                                   </button>
                                 </li>
                                 <li>
-                                  <Link to={`/shop/${product._id || product.id}`}>
+                                  <Link to={`/shop/${productId}`}>
                                     <img src="/img/icon/search.png" alt="Search" />
                                     <span>View details</span>
                                   </Link>
@@ -359,30 +402,29 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                               </ul>
                             </div>
                             <div className="product__item__text">
-                              <h6>{product.name}</h6>
+                              <h6>{product.title}</h6>
                               <button
                                 className="add-cart"
                                 onClick={() => addToCart(product)}
-                                disabled={isCartLoading(product._id || product.id)}
-                                style={{ opacity: isCartLoading(product._id || product.id) ? 0.6 : 1 }}
+                                disabled={isCartLoading(productId)}
+                                style={{ opacity: isCartLoading(productId) ? 0.6 : 1 }}
                               >
-                                {isCartLoading(product._id || product.id) ? "Adding..." : "+ Add To Cart"}
+                                {isCartLoading(productId) ? "Adding..." : "+ Add To Cart"}
                               </button>
                               <div className="rating">
                                 {[...Array(5)].map((_, rIdx) => (
                                   <i
                                     key={rIdx}
-                                    className={`fa ${rIdx < product.rating ? "fa-star" : "fa-star-o"
-                                      }`}
+                                    className={`fa ${rIdx < Math.round(product.rating || 0) ? "fa-star" : "fa-star-o"}`}
                                   />
                                 ))}
                               </div>
                               <h5>
-                                ${product.price.toFixed(2)}{" "}
-                                {product.oldPrice && <span>${product.oldPrice.toFixed(2)}</span>}
+                                ${displayPrice.toFixed(2)}{" "}
+                                {hasDiscount && <span>${product.price.toFixed(2)}</span>}
                               </h5>
                               <div className="product__color__select">
-                                {product.colors.map((colorHex, cIdx) => (
+                                {(product.colors || []).map((colorHex, cIdx) => (
                                   <label
                                     key={cIdx}
                                     style={{ backgroundColor: colorHex }}
@@ -398,6 +440,47 @@ export default function Shop({ isUserLoged, setIsUserLoged }) {
                   </AnimatePresence>
                 )}
               </motion.div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="row">
+                  <div className="col-lg-12">
+                    <div className="product__pagination" style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "40px" }}>
+                      {[...Array(totalPages)].map((_, index) => {
+                        const pageNum = index + 1;
+                        return (
+                          <a
+                            key={pageNum}
+                            href="#"
+                            className={currentPage === pageNum ? "active" : ""}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setCurrentPage(pageNum);
+                            }}
+                            style={{
+                              display: "inline-block",
+                              width: "40px",
+                              height: "40px",
+                              lineHeight: "40px",
+                              textAlign: "center",
+                              border: "1px solid #e1e1e1",
+                              borderRadius: "50%",
+                              color: currentPage === pageNum ? "#fff" : "#111",
+                              backgroundColor: currentPage === pageNum ? "#111" : "transparent",
+                              fontWeight: "700",
+                              fontSize: "14px",
+                              transition: "all 0.3s"
+                            }}
+                          >
+                            {pageNum}
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
         </div>
