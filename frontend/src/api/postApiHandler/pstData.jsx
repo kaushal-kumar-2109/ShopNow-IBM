@@ -17,4 +17,8 @@ const updateUserPassword = async (data) => {
     return await PostDataCall(ROUTERS.PUT_ROUTE.updatePassword, data);
 }
 
-export { sendOtp, createUser, setUser, updateUserPassword };
+const postComment = async (data) => {
+    return await PostDataCall(ROUTERS.POST_ROUTE.postComment, data);
+}
+
+export { sendOtp, createUser, setUser, updateUserPassword, postComment };

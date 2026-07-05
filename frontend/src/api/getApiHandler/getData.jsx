@@ -30,5 +30,16 @@ const getBannerProducts = async (categories) => {
         .map((r) => r.data[0]);
 }
 
-export { getUserData, getLatestProduct, getProductsByCategory, getLatestProducts, getBannerProducts };
+// Fetch a single product by its MongoDB _id
+const getProductById = async (id) => {
+    return await GetDataCall(`${ROUTERS.GET_ROUTE.getProduct}/${id}`);
+}
+
+// Fetch comments for a product (paginated)
+const getProductComments = async (productId, page = 1, limit = 10) => {
+    const url = `${ROUTERS.GET_ROUTE.getProductComments}/${productId}?page=${page}&limit=${limit}`;
+    return await GetDataCall(url);
+}
+
+export { getUserData, getLatestProduct, getProductsByCategory, getLatestProducts, getBannerProducts, getProductById, getProductComments };
 
