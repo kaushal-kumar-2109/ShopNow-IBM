@@ -97,7 +97,7 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
                             fontWeight: "700",
                             padding: "1px",
                             flexShrink: 0
-                          }}><img src="../../public/userIcon.png" alt="user Icon" style={{ width: "80%", height: "80%" }} /></span>
+                          }}><img src="/img/userIcon.png" alt="user Icon" style={{ width: "80%", height: "80%" }} /></span>
 
                           <i className="arrow_carrot-down" style={{ position: "static", marginLeft: "2px", fontSize: "12px" }}></i>
                         </span>
