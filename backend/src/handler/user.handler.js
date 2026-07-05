@@ -60,7 +60,7 @@ const CreateUser = async (req, res) => {
             res.cookie("jwtoken", response.token, {
                 httpOnly: true,
                 secure: (process.env.WEB === "local") ? false : true,
-                sameSite: (process.env.WEB === "local") ? "lax" : "strict",
+                sameSite: (process.env.WEB === "local") ? "lax" : "none",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
             const oldToken = await Token.findOne({ email });
@@ -98,7 +98,7 @@ const SetUser = async (req, res) => {
             res.cookie("jwtoken", response.token, {
                 httpOnly: true,
                 secure: (process.env.WEB === "local") ? false : true,
-                sameSite: (process.env.WEB === "local") ? "lax" : "strict",
+                sameSite: (process.env.WEB === "local") ? "lax" : "none",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
