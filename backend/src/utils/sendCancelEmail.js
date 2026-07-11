@@ -1,159 +1,242 @@
-const nodemailer = require("nodemailer");
+// const nodemailer = require("nodemailer");
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.SMTP_USER_EMAIL,
-        pass: process.env.SMTP_USER_PASS
-    }
-});
+// const transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//         user: process.env.SMTP_USER_EMAIL,
+//         pass: process.env.SMTP_USER_PASS
+//     }
+// });
 
-const sendCancelEmail = async (order) => {
+// const sendCancelEmail = async (order) => {
+//     try {
+//         const orderDateStr = new Date().toLocaleDateString("en-US", {
+//             day: "numeric",
+//             month: "short",
+//             year: "numeric",
+//             hour: "2-digit",
+//             minute: "2-digit"
+//         });
+
+//         // Generate items HTML table rows
+//         const itemsRows = order.items.map((item, idx) => {
+//             const sizeText = item.size ? `<span style="font-size:12px; color:#777;">Size: ${item.size}</span>` : "";
+//             const colorText = item.color ? `<span style="font-size:12px; color:#777; margin-left:8px;">Color: ${item.color}</span>` : "";
+//             const details = [sizeText, colorText].filter(Boolean).join(" | ");
+
+//             let imgUrl = item.image || "";
+//             if (imgUrl && !imgUrl.startsWith("http://") && !imgUrl.startsWith("https://")) {
+//                 const clientUrl = "http://localhost:5173";
+//                 imgUrl = `${clientUrl}${imgUrl.startsWith("/") ? "" : "/"}${imgUrl}`;
+//             }
+
+//             return `
+//             <tr>
+//                 <td style="padding: 12px; border-bottom: 1px solid #edf2f7; text-align: left; vertical-align: middle;">
+//                     <img src="${imgUrl}" alt="${item.title}" width="50" style="border-radius: 4px; display: inline-block; vertical-align: middle; margin-right: 10px;" />
+//                     <div style="display: inline-block; vertical-align: middle;">
+//                         <span style="font-weight: 600; color: #2d3748; display: block; text-decoration: line-through;">${item.title}</span>
+//                         ${details ? `<div style="margin-top: 3px;">${details}</div>` : ""}
+//                     </div>
+//                 </td>
+//                 <td style="padding: 12px; border-bottom: 1px solid #edf2f7; text-align: center; color: #718096; text-decoration: line-through;">
+//                     ${item.quantity}
+//                 </td>
+//                 <td style="padding: 12px; border-bottom: 1px solid #edf2f7; text-align: right; color: #718096; text-decoration: line-through;">
+//                     $${item.price.toFixed(2)}
+//                 </td>
+//                 <td style="padding: 12px; border-bottom: 1px solid #edf2f7; text-align: right; font-weight: 700; color: #718096; text-decoration: line-through;">
+//                     $${(item.price * item.quantity).toFixed(2)}
+//                 </td>
+//             </tr>
+//             `;
+//         }).join("");
+
+//         const htmlContent = `
+//         <!DOCTYPE html>
+//         <html>
+//         <head>
+//             <meta charset="utf-8">
+//             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//             <title>Order Cancelled - ShopNow</title>
+//             <style>
+//                 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f7fafc; margin: 0; padding: 0; }
+//                 .wrapper { width: 100%; background-color: #f7fafc; padding: 30px 0; }
+//                 .container { max-width: 600px; background-color: #ffffff; margin: 0 auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0; }
+//                 .header { background-color: #111111; padding: 25px; text-align: center; }
+//                 .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+//                 .banner { background-color: #e53637; padding: 15px; text-align: center; color: #ffffff; font-weight: 700; font-size: 16px; letter-spacing: 0.5px; }
+//                 .content { padding: 30px; color: #2d3748; }
+//                 .content h2 { font-size: 20px; font-weight: 700; margin-top: 0; color: #111111; border-bottom: 2px solid #f7fafc; padding-bottom: 10px; }
+//                 .order-meta-table { width: 100%; margin-bottom: 25px; border-collapse: collapse; }
+//                 .order-meta-table td { padding: 6px 0; font-size: 14px; color: #718096; }
+//                 .order-meta-table td.strong { font-weight: 700; color: #2d3748; text-align: right; }
+//                 .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+//                 .items-table th { background-color: #f7fafc; padding: 10px 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #718096; text-align: left; border-bottom: 2px solid #edf2f7; }
+//                 .footer { padding: 25px 30px; background-color: #f7fafc; font-size: 12px; color: #718096; text-align: center; border-top: 1px solid #edf2f7; }
+//                 .footer p { margin: 5px 0; }
+//             </style>
+//         </head>
+//         <body>
+//             <div class="wrapper">
+//                 <div class="container">
+//                     <!-- Branding Header -->
+//                     <div class="header">
+//                         <h1>ShopNow</h1>
+//                     </div>
+//                     <!-- Announcement banner -->
+//                     <div class="banner" style="background-color: #4a5568;">
+//                         ORDER CANCELLED SUCCESSFULLY
+//                     </div>
+                    
+//                     <div class="content">
+//                         <h2>Cancellation Confirmation</h2>
+//                         <p>Hi ${order.billingAddress.reciver},</p>
+//                         <p>This email confirms that your order has been cancelled successfully as requested. No charges have been made or any pending auth holds have been cleared.</p>
+                        
+//                         <!-- Order Meta Info -->
+//                         <table class="order-meta-table">
+//                             <tr>
+//                                 <td>Order Number:</td>
+//                                 <td class="strong">#${order._id}</td>
+//                             </tr>
+//                             <tr>
+//                                 <td>Cancellation Date:</td>
+//                                 <td class="strong">${orderDateStr}</td>
+//                             </tr>
+//                             <tr>
+//                                 <td>Refund Amount:</td>
+//                                 <td class="strong" style="color: #e53637; font-size: 16px;">$${order.totalAmount.toFixed(2)}</td>
+//                             </tr>
+//                         </table>
+                        
+//                         <!-- Items Table -->
+//                         <h3 style="font-size: 16px; margin-bottom: 10px;">Cancelled Items</h3>
+//                         <table class="items-table">
+//                             <thead>
+//                                 <tr>
+//                                     <th style="text-align: left;">Product</th>
+//                                     <th style="text-align: center; width: 60px;">Qty</th>
+//                                     <th style="text-align: right; width: 80px;">Price</th>
+//                                     <th style="text-align: right; width: 80px;">Total</th>
+//                                 </tr>
+//                             </thead>
+//                             <tbody>
+//                                 ${itemsRows}
+//                             </tbody>
+//                         </table>
+//                     </div>
+                    
+//                     <!-- Regards & footer info -->
+//                     <div class="footer">
+//                         <p>If you did not request this cancellation, please contact our support team immediately.</p>
+//                         <p>&copy; ${new Date().getFullYear()} ShopNow Inc. All rights reserved.</p>
+//                     </div>
+//                 </div>
+//             </div>
+//         </body>
+//         </html>
+//         `;
+
+//         const textContent = `Your order has been cancelled successfully.\n\nOrder Number: #${order._id}\nRefund Amount: $${order.totalAmount.toFixed(2)}\n\nShopNow Team`;
+
+//         const mailOptions = {
+//             from: '"ShopNow Cancel Receipts" <receipts.shopnow@gmail.com>',
+//             to: order.email,
+//             subject: `ShopNow Order Cancelled - #${order._id}`,
+//             text: textContent,
+//             html: htmlContent
+//         };
+
+//         const info = await transporter.sendMail(mailOptions);
+//         return { status: true, message: "Cancellation email sent", info: info.messageId };
+//     } catch (err) {
+//         console.error("Failed to send cancellation email:", err);
+//         return { status: false, error: err };
+//     }
+// };
+
+// module.exports = sendCancelEmail;
+
+
+
+
+
+
+const emailjs = require("@emailjs/nodejs");
+
+const sendOrderEmail = async (order) => {
     try {
-        const orderDateStr = new Date().toLocaleDateString("en-US", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
-        });
-
-        // Generate items HTML table rows
-        const itemsRows = order.items.map((item, idx) => {
-            const sizeText = item.size ? `<span style="font-size:12px; color:#777;">Size: ${item.size}</span>` : "";
-            const colorText = item.color ? `<span style="font-size:12px; color:#777; margin-left:8px;">Color: ${item.color}</span>` : "";
-            const details = [sizeText, colorText].filter(Boolean).join(" | ");
-
+        // 1. Programmatically generate the HTML items blocks matching your design loop
+        const itemsBlocks = order.items.map((item) => {
             let imgUrl = item.image || "";
             if (imgUrl && !imgUrl.startsWith("http://") && !imgUrl.startsWith("https://")) {
-                const clientUrl = "http://localhost:5173";
+                const clientUrl = process.env.NODE_ENV === 'production' 
+                    ? 'https://vercel.app' 
+                    : 'http://localhost:5173';
                 imgUrl = `${clientUrl}${imgUrl.startsWith("/") ? "" : "/"}${imgUrl}`;
             }
 
+            const sizeText = item.size ? ` | Size: ${item.size}` : "";
+            const colorText = item.color ? ` | Color: ${item.color}` : "";
+
             return `
-            <tr>
-                <td style="padding: 12px; border-bottom: 1px solid #edf2f7; text-align: left; vertical-align: middle;">
-                    <img src="${imgUrl}" alt="${item.title}" width="50" style="border-radius: 4px; display: inline-block; vertical-align: middle; margin-right: 10px;" />
-                    <div style="display: inline-block; vertical-align: middle;">
-                        <span style="font-weight: 600; color: #2d3748; display: block; text-decoration: line-through;">${item.title}</span>
-                        ${details ? `<div style="margin-top: 3px;">${details}</div>` : ""}
-                    </div>
-                </td>
-                <td style="padding: 12px; border-bottom: 1px solid #edf2f7; text-align: center; color: #718096; text-decoration: line-through;">
-                    ${item.quantity}
-                </td>
-                <td style="padding: 12px; border-bottom: 1px solid #edf2f7; text-align: right; color: #718096; text-decoration: line-through;">
-                    $${item.price.toFixed(2)}
-                </td>
-                <td style="padding: 12px; border-bottom: 1px solid #edf2f7; text-align: right; font-weight: 700; color: #718096; text-decoration: line-through;">
-                    $${(item.price * item.quantity).toFixed(2)}
-                </td>
-            </tr>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                <tr style="vertical-align: top">
+                    <td style="padding: 24px 8px 0 4px; display: inline-block; width: max-content">
+                        <img style="height: 64px" height="64px" src=${item.image} alt="${item.title || 'item'}" />
+                    </td>
+                    <td style="padding: 24px 8px 0 8px; width: 100%; text-align: left;">
+                        <div>${item.title}</div>
+                        <div style="font-size: 14px; color: #888; padding-top: 4px">
+                            QTY: ${item.quantity}${sizeText}${colorText}
+                        </div>
+                    </td>
+                    <td style="padding: 24px 4px 0 0; white-space: nowrap; text-align: right;">
+                        <strong>$${item.price.toFixed(2)}</strong>
+                    </td>
+                </tr>
+            </table>
             `;
         }).join("");
 
-        const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Order Cancelled - ShopNow</title>
-            <style>
-                body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f7fafc; margin: 0; padding: 0; }
-                .wrapper { width: 100%; background-color: #f7fafc; padding: 30px 0; }
-                .container { max-width: 600px; background-color: #ffffff; margin: 0 auto; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #e2e8f0; }
-                .header { background-color: #111111; padding: 25px; text-align: center; }
-                .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
-                .banner { background-color: #e53637; padding: 15px; text-align: center; color: #ffffff; font-weight: 700; font-size: 16px; letter-spacing: 0.5px; }
-                .content { padding: 30px; color: #2d3748; }
-                .content h2 { font-size: 20px; font-weight: 700; margin-top: 0; color: #111111; border-bottom: 2px solid #f7fafc; padding-bottom: 10px; }
-                .order-meta-table { width: 100%; margin-bottom: 25px; border-collapse: collapse; }
-                .order-meta-table td { padding: 6px 0; font-size: 14px; color: #718096; }
-                .order-meta-table td.strong { font-weight: 700; color: #2d3748; text-align: right; }
-                .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-                .items-table th { background-color: #f7fafc; padding: 10px 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #718096; text-align: left; border-bottom: 2px solid #edf2f7; }
-                .footer { padding: 25px 30px; background-color: #f7fafc; font-size: 12px; color: #718096; text-align: center; border-top: 1px solid #edf2f7; }
-                .footer p { margin: 5px 0; }
-            </style>
-        </head>
-        <body>
-            <div class="wrapper">
-                <div class="container">
-                    <!-- Branding Header -->
-                    <div class="header">
-                        <h1>ShopNow</h1>
-                    </div>
-                    <!-- Announcement banner -->
-                    <div class="banner" style="background-color: #4a5568;">
-                        ORDER CANCELLED SUCCESSFULLY
-                    </div>
-                    
-                    <div class="content">
-                        <h2>Cancellation Confirmation</h2>
-                        <p>Hi ${order.billingAddress.reciver},</p>
-                        <p>This email confirms that your order has been cancelled successfully as requested. No charges have been made or any pending auth holds have been cleared.</p>
-                        
-                        <!-- Order Meta Info -->
-                        <table class="order-meta-table">
-                            <tr>
-                                <td>Order Number:</td>
-                                <td class="strong">#${order._id}</td>
-                            </tr>
-                            <tr>
-                                <td>Cancellation Date:</td>
-                                <td class="strong">${orderDateStr}</td>
-                            </tr>
-                            <tr>
-                                <td>Refund Amount:</td>
-                                <td class="strong" style="color: #e53637; font-size: 16px;">$${order.totalAmount.toFixed(2)}</td>
-                            </tr>
-                        </table>
-                        
-                        <!-- Items Table -->
-                        <h3 style="font-size: 16px; margin-bottom: 10px;">Cancelled Items</h3>
-                        <table class="items-table">
-                            <thead>
-                                <tr>
-                                    <th style="text-align: left;">Product</th>
-                                    <th style="text-align: center; width: 60px;">Qty</th>
-                                    <th style="text-align: right; width: 80px;">Price</th>
-                                    <th style="text-align: right; width: 80px;">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${itemsRows}
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Regards & footer info -->
-                    <div class="footer">
-                        <p>If you did not request this cancellation, please contact our support team immediately.</p>
-                        <p>&copy; ${new Date().getFullYear()} ShopNow Inc. All rights reserved.</p>
-                    </div>
-                </div>
-            </div>
-        </body>
-        </html>
-        `;
+        // 2. Set up fallback calculation values safely
+        const shippingCost = typeof order.shippingCost === 'number' ? order.shippingCost : 0.00;
+        const taxCost = typeof order.taxCost === 'number' ? order.taxCost : 0.00;
+        const totalCost = order.totalAmount || 0.00;
 
-        const textContent = `Your order has been cancelled successfully.\n\nOrder Number: #${order._id}\nRefund Amount: $${order.totalAmount.toFixed(2)}\n\nShopNow Team`;
-
-        const mailOptions = {
-            from: '"ShopNow Cancel Receipts" <receipts.shopnow@gmail.com>',
-            to: order.email,
-            subject: `ShopNow Order Cancelled - #${order._id}`,
-            text: textContent,
-            html: htmlContent
+        // 3. Map parameters to perfectly match your EmailJS web dashboard template variables
+        
+        const templateParams = {
+            order_id: order._id,
+            to_email: order.billingAddress.email || order.email,
+            email: order.billingAddress.email || order.email,
+            shipping: shippingCost.toFixed(2),
+            tax: taxCost.toFixed(2),
+            total: totalCost.toFixed(2),
+            itemsBlocks: itemsBlocks,// Injects the generated item rows straight in
+            order_status: " Your Order Cancellation Confirmed",
+            order_message: "As requested, your order has been successfully cancelled.",
+            customer_name: order.billingAddress.reciver || "Valued Customer",
         };
 
-        const info = await transporter.sendMail(mailOptions);
-        return { status: true, message: "Cancellation email sent", info: info.messageId };
-    } catch (err) {
-        console.error("Failed to send cancellation email:", err);
-        return { status: false, error: err };
+        // 4. Send payload to EmailJS
+        const response = await emailjs.send(
+            process.env.EMAIL_JS_SERVICE_ID,   
+            process.env.EMAIL_JS_ORDER_TEMPLATE_ID, 
+            templateParams,
+            {
+                publicKey: process.env.EMAIL_JS_PUBLIC_KEY,   
+                privateKey: process.env.EMAIL_JS_PRIVATE_KEY, 
+            }
+        );
+
+        return { status: true, message: 'Order cancellation sent successfully via EmailJS!', info: response };
+
+    } catch (error) {
+        console.error('Error sending order email via EmailJS:', error);
+        return { status: false, message: 'Failed to send order email!', info: error };
     }
 };
 
-module.exports = sendCancelEmail;
+module.exports = sendOrderEmail;
