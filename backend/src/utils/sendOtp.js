@@ -9,7 +9,7 @@ const nodemailer = require("nodemailer");
 //     }
 // });
 const transporter = nodemailer.createTransport({
-  host: 'smtp4.gmail.com',
+  host: 'smtp.gmail.com',
   port: 465,
   secure: true, // true for port 465
   auth: {
@@ -18,6 +18,7 @@ const transporter = nodemailer.createTransport({
   },
   // Add this line to force IPv4 connection
   connectionTimeout: 10000, 
+  family: 4
 });
 
 // 2. Define the email options
