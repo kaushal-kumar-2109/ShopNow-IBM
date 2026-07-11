@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import Loader from "../../components/Loader";
 import { sendOtp, updateUserPassword } from "../../api/postApiHandler/pstData";
 import "./setup.css";
+import { getDeviceInfo } from "../../utils/getDeviceData";
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -110,6 +111,7 @@ export default function ForgotPassword() {
   // Verify Code and Save New Password
   const handleResetSubmit = async (e) => {
     e.preventDefault();
+    const deviceRes = await getDeviceInfo();
     const enteredOtp = otpDigits.join("");
 
     if (enteredOtp.length < 4) {
@@ -132,7 +134,8 @@ export default function ForgotPassword() {
       const res = await updateUserPassword({
         email,
         password: newPassword,
-        otp: enteredOtp
+        otp: enteredOtp,
+        deviceRes: deviceRes.data
       });
 
       if (res.flag === false) {

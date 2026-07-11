@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { getDeviceInfo } from "../../utils/getDeviceData";
 
 import Loader from "../../components/Loader";
 import { sendOtp, createUser } from "../../api/postApiHandler/pstData";
@@ -125,12 +126,13 @@ export default function Signup({ setIsUserLoged }) {
 
     try {
       setLoading(true);
-
+      const deviceRes = await getDeviceInfo();
       const res = await createUser({
         name: formData.name,
         email: formData.email,
         password: formData.password,
         otp,
+        deviceRes: deviceRes.data
       });
       if (res.flag === false) {
         toast.error(res.message || (res.data && res.data.message) || "Registration failed.");

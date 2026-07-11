@@ -4,7 +4,8 @@ const User = require("../../db/models/user.model.js");
 const Otp = require("../../db/models/otp.model.js");
 const Token = require("../../db/models/token.model.js");
 const SendOTP = require("../utils/sendOtp.js");
-const CreateUserToken = require("../utils/createToken.js");
+const { CreateUserToken, CreateDeviceToken } = require("../utils/createToken.js");
+const Device = require("../../db/models/device.model.js");
 
 const SendOtp = async (req, res) => {
     try {
@@ -35,53 +36,88 @@ const SendOtp = async (req, res) => {
 
 const CreateUser = async (req, res) => {
     try {
-        const { name, email, password, otp } = req.body;
+        const { name, email, password, otp, deviceRes } = req.body;
 
+        // 1. Core Input Validation
         if (!name) return res.status(400).json({ tag: "name", message: "Name is required" });
         if (!email) return res.status(400).json({ tag: "email", message: "Email is required" });
         if (!password) return res.status(400).json({ tag: "password", message: "Password is required" });
         if (!otp) return res.status(400).json({ tag: "otp", message: "Otp required" });
 
+        // 2. Existing User Verification
         const existUser = await User.findOne({ email });
         if (existUser) return res.status(400).json({ tag: "email", message: "User already exists" });
 
+        // 3. OTP Verification Validation
         const otpData = await Otp.findOne({ email });
         if (!otpData) return res.status(400).json({ tag: "otp", message: "OTP is not valid" });
         if (otpData.expires_at <= Date.now()) return res.status(400).json({ tag: "otp", message: "OTP is expired" });
         if (parseInt(otpData.otp) !== parseInt(otp)) return res.status(400).json({ tag: "otp", message: "OTP is not valid" });
 
+        // 4. User Generation
         const hashedPassword = await bcrypt.hash(password, 10);
-        await User.create({ name, email, password: hashedPassword });
+        const newUser = new User({ name, email, password: hashedPassword });
         await Otp.deleteOne({ email });
 
+        // 5. Safe Extraction of Device Variables (Prevents Server Crashes if missing)
+        const deviceData = deviceRes || {};
+        const resolutionString = Array.isArray(deviceData.screenResolution)
+            ? deviceData.screenResolution.join('x')
+            : (deviceData.screenResolution || "unknown");
+
+        // 6. Token Generation
+        const deviceToken = await CreateDeviceToken(deviceRes);
         const response = await CreateUserToken(name, email, "USER");
+
         if (response.status) {
-            // res.clearCookie('token');
+            const isLocal = process.env.WEB === "local";
+
+            // 7. Secure Cookie Storage Setup
             res.cookie("jwtoken", response.token, {
                 httpOnly: true,
-                secure: (process.env.WEB === "local") ? false : true,
-                sameSite: (process.env.WEB === "local") ? "lax" : "none",
+                secure: !isLocal,
+                sameSite: isLocal ? "lax" : "none",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
-            const oldToken = await Token.findOne({ email });
-            if (oldToken) await Token.deleteOne({ email });
-            await Token.create({
-                token: response.token,
-                email: email
+
+            res.cookie("deviceToken", deviceToken.token, {
+                httpOnly: true,
+                secure: !isLocal,
+                sameSite: isLocal ? "lax" : "none",
             });
+
+            await newUser.save();
+            // 8. Clean up Old User Authorization Tokens
+            await Token.deleteOne({ email });
+            await Token.create({ token: response.token, email: email });
+
+            // 10. Persist Safe Fingerprint Record
+            await Device.create({
+                userId: newUser._id,
+                architecture: deviceData.architecture || "unknown",
+                hardwareConcurrency: deviceData.hardwareConcurrency || 0,
+                deviceMemory: deviceData.deviceMemory || 0,
+                screenResolution: resolutionString,
+                timezone: deviceData.timezone || "unknown",
+                platform: deviceData.platform || "unknown",
+                deviceToken: deviceToken.token
+            });
+
             return res.status(201).json({ message: "User created successfully", token: response.token });
         } else {
             return res.status(401).json({ tag: "token", message: "Token is not created" });
         }
     } catch (err) {
-        console.log("There is an server error => ", err);
-        return res.status(500).json({ message: "Internal server error", error: err });
+        console.error("There is a server error => ", err);
+        return res.status(500).json({ message: "Internal server error" });
     }
 }
 
+
 const SetUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
+
+        const { email, password, deviceRes } = req.body;
 
         if (!email) return res.status(400).json({ tag: "email", message: "Email is required" });
         if (!password) return res.status(400).json({ tag: "password", message: "Password is required" });

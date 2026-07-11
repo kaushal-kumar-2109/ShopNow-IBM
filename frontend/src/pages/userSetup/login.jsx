@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Loader from "../../components/Loader";
 import { setUser } from "../../api/postApiHandler/pstData";
+import { getDeviceInfo } from "../../utils/getDeviceData";
 import "./setup.css";
 
 export default function Login({ setIsUserLoged }) {
@@ -19,6 +20,7 @@ export default function Login({ setIsUserLoged }) {
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
+    const deviceRes = await getDeviceInfo();
     if (!email || !password) {
       toast.error("Please fill in all fields.");
       return;
@@ -28,7 +30,7 @@ export default function Login({ setIsUserLoged }) {
     const toastId = toast.loading("Signing you in...");
 
     try {
-      const res = await setUser({ email, password });
+      const res = await setUser({ email, password, deviceRes: deviceRes.data });
       if (res.flag === false) {
         toast.error(res.message || (res.data && res.data.message) || "Authentication failed.", { id: toastId });
         return;

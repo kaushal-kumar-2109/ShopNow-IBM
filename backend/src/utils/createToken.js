@@ -17,4 +17,16 @@ const CreateUserToken = async (name, email, role = "USER") => {
     }
 }
 
-module.exports = CreateUserToken;
+const CreateDeviceToken = async (data) => {
+    const devicePayload = data;
+    try {
+        const secretKey = process.env.JWT_SECRET;
+        const token = jwt.sign(devicePayload, secretKey);
+        return ({ status: true, message: "Token created successfully ", token: token });
+    } catch (err) {
+        console.log("Error in creating device token => ", err);
+        return ({ status: false, message: "Error in creating token ", error: err });
+    }
+}
+
+module.exports = { CreateUserToken, CreateDeviceToken };

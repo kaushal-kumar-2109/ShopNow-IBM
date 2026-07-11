@@ -1,4 +1,5 @@
-const WEB_PATH = "https://shopnow-ibm.onrender.com";
+const WEB_PATH = "http://localhost:3000";
+// "https://shopnow-ibm.onrender.com";
 // || "http://localhost:3000" || "http://192.168.1.18:3000";
 const MAIN_SUB_WEB_URL = "/ShopNow/api";
 
