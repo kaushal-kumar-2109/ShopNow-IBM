@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors({
-    origin: ['https://shop-now-neon.vercel.app', 'http://localhost:5173','smtp.gmail.com'],
+    origin: ['https://shop-now-neon.vercel.app', 'http://localhost:5173','smtp.gmail.com','https://shopnow-ibm.onrender.com'],
     credentials: true
 }));
 app.use(cookieParser());
