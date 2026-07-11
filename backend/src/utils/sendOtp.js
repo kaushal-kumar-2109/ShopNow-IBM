@@ -9,7 +9,7 @@ const nodemailer = require("nodemailer");
 //     }
 // });
 const transporter = nodemailer.createTransport({
-  host: '://gmail.com',
+  host: 'smtp.gmail.com',
   port: 465,
   secure: true, // true for port 465
   auth: {
