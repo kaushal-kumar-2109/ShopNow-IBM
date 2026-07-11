@@ -1,0 +1,794 @@
+/* ==========================================================================
+   ShopNow Custom Premium Theme System (Light, Dark, System Theme Mappings)
+   ========================================================================== */
+
+/* 1. Core Color Variables Definition */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f3f2ee;
+  --bg-tertiary: #f9f9f9;
+  --bg-card: #ffffff;
+  --bg-input: #ffffff;
+  --bg-border: #e1e1e1;
+  --bg-border-light: #f0f0f0;
+  
+  --text-primary: #3d3d3d;
+  --text-secondary: #111111;
+  --text-muted: #888888;
+  --text-light: #b7b7b7;
+  
+  --header-bg: #ffffff;
+  --header-top-bg: #f3f2ee;
+  --footer-bg: #111111;
+  --footer-text: #b7b7b7;
+  
+  --shadow-sm: 0px 2px 10px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0px 15px 30px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0px 5px 25px rgba(0, 0, 0, 0.15);
+  
+  --modal-bg: rgba(255, 255, 255, 0.95);
+  --modal-overlay: rgba(0, 0, 0, 0.6);
+  --accent-color: #e53637;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0f0f10;
+  --bg-secondary: #161618;
+  --bg-tertiary: #1b1b1e;
+  --bg-card: #161618;
+  --bg-input: #1e1e21;
+  --bg-border: #262629;
+  --bg-border-light: #1f1f22;
+  
+  --text-primary: #abb1bd;
+  --text-secondary: #f3f4f6;
+  --text-muted: #848a96;
+  --text-light: #525866;
+  
+  --header-bg: #0f0f10;
+  --header-top-bg: #080809;
+  --footer-bg: #080809;
+  --footer-text: #848a96;
+  
+  --shadow-sm: 0px 4px 15px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0px 15px 40px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0px 10px 35px rgba(0, 0, 0, 0.6);
+  
+  --modal-bg: #161618;
+  --modal-overlay: rgba(0, 0, 0, 0.85);
+  --accent-color: #ff4a4b;
+}
+
+/* 2. Global Typography & Core Overrides */
+body {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-secondary) !important;
+  transition: color 0.3s ease;
+}
+
+p {
+  color: var(--text-primary) !important;
+  transition: color 0.3s ease;
+}
+
+hr {
+  border-color: var(--bg-border) !important;
+}
+
+/* Inputs, Selects, Textareas */
+input, select, textarea {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--bg-border) !important;
+  transition: all 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-color) !important;
+}
+
+/* 3. Layout Component Styles */
+
+/* Header & Dropdowns */
+.header {
+  background-color: var(--header-bg) !important;
+  border-bottom: 1px solid var(--bg-border) !important;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.header__top {
+  background-color: var(--header-top-bg) !important;
+  transition: background-color 0.3s ease;
+}
+
+.header__menu ul li a {
+  color: var(--text-secondary) !important;
+}
+
+.header__menu ul li a:hover,
+.header__menu ul li.active a {
+  color: var(--accent-color) !important;
+}
+
+.header__menu ul li .dropdown {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--bg-border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.header__menu ul li .dropdown li a {
+  color: var(--text-primary) !important;
+}
+
+.header__menu ul li .dropdown li a:hover {
+  color: var(--accent-color) !important;
+  background-color: var(--bg-secondary) !important;
+}
+
+.header__top__left p {
+  color: var(--text-primary) !important;
+}
+
+.header__top__links a {
+  color: var(--text-primary) !important;
+}
+
+.header__top__hover span {
+  color: var(--text-primary) !important;
+}
+
+.header__top__hover ul {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--bg-border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.header__top__hover ul li {
+  color: var(--text-primary) !important;
+}
+
+.header__top__hover ul li:hover {
+  color: var(--accent-color) !important;
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Footer Section */
+.footer {
+  background-color: var(--footer-bg) !important;
+  transition: background-color 0.3s ease;
+}
+
+.footer__about p,
+.footer__widget ul li a,
+.footer__widget p {
+  color: var(--footer-text) !important;
+}
+
+.footer__widget h6 {
+  color: #ffffff !important;
+}
+
+.footer__widget ul li a:hover {
+  color: var(--accent-color) !important;
+}
+
+.footer__copyright__text p {
+  color: var(--footer-text) !important;
+}
+
+/* Breadcrumbs Section */
+.breadcrumb-option {
+  background-color: var(--bg-secondary) !important;
+  transition: background-color 0.3s ease;
+}
+
+.breadcrumb__text h4 {
+  color: var(--text-secondary) !important;
+}
+
+.breadcrumb__links a,
+.breadcrumb__links span {
+  color: var(--text-primary) !important;
+}
+
+.breadcrumb__links span::after {
+  color: var(--text-primary) !important;
+}
+
+/* Product Cards Grid & Display */
+.product__item {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--bg-border) !important;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm) !important;
+  transition: all 0.3s ease;
+}
+
+.product__item:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md) !important;
+}
+
+.product__item__text {
+  padding: 20px !important;
+  background-color: var(--bg-card) !important;
+}
+
+.product__item__text h6 {
+  color: var(--text-secondary) !important;
+}
+
+.product__item__text h5 {
+  color: var(--accent-color) !important;
+}
+
+.product__item__pic {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Shop Page UI */
+.shop__sidebar__search form input {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.shop__sidebar__search form button span {
+  color: var(--text-primary) !important;
+}
+
+.card-heading span {
+  color: var(--text-secondary) !important;
+}
+
+.card-body {
+  background-color: transparent !important;
+}
+
+.shop__sidebar__categories ul li a {
+  color: var(--text-primary) !important;
+}
+
+.shop__sidebar__categories ul li a.active,
+.shop__sidebar__categories ul li a:hover {
+  color: var(--accent-color) !important;
+  font-weight: 700;
+}
+
+.shop__sidebar__price ul li a {
+  color: var(--text-primary) !important;
+}
+
+.shop__sidebar__price ul li a.active,
+.shop__sidebar__price ul li a:hover {
+  color: var(--accent-color) !important;
+}
+
+.shop__sidebar__size label,
+.shop__sidebar__color label {
+  border: 1px solid var(--bg-border) !important;
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+.shop__sidebar__size label.active,
+.shop__sidebar__size label:hover {
+  border-color: var(--accent-color) !important;
+  color: var(--accent-color) !important;
+}
+
+.shop__product__option__right select {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+/* Pagination */
+.product__pagination a {
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--bg-border) !important;
+  background-color: var(--bg-card) !important;
+}
+
+.product__pagination a.active,
+.product__pagination a:hover {
+  background-color: var(--accent-color) !important;
+  color: #ffffff !important;
+  border-color: var(--accent-color) !important;
+}
+
+/* Product Details Page styling */
+.product__details__text h3 {
+  color: var(--text-secondary) !important;
+}
+
+.product__details__text h4 {
+  color: var(--accent-color) !important;
+}
+
+.product__details__text p {
+  color: var(--text-primary) !important;
+}
+
+.product__details__cart__option .quantity input {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.product__details__tab .nav-tabs {
+  border-bottom: 2px solid var(--bg-border) !important;
+}
+
+.product__details__tab .nav-tabs .nav-link {
+  color: var(--text-muted) !important;
+}
+
+.product__details__tab .nav-tabs .nav-link.active {
+  color: var(--text-secondary) !important;
+  border-bottom: 2px solid var(--accent-color) !important;
+}
+
+.comment-card {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--bg-border) !important;
+  box-shadow: var(--shadow-sm) !important;
+  border-radius: 8px;
+}
+
+.comment-card h6 {
+  color: var(--text-secondary) !important;
+}
+
+/* Cart Page */
+.shopping__cart__table table tbody tr td.product__cart__item__text h6 {
+  color: var(--text-secondary) !important;
+}
+
+.shopping__cart__table table tbody tr td.cart__price,
+.shopping__cart__table table tbody tr td.cart__close span {
+  color: var(--text-secondary) !important;
+}
+
+.shopping__cart__table table thead {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+}
+
+.shopping__cart__table table thead tr th {
+  color: var(--text-secondary) !important;
+}
+
+.cart__discount form input {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.cart__total {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.cart__total h6 {
+  color: var(--text-secondary) !important;
+}
+
+.cart__total ul li span {
+  color: var(--text-secondary) !important;
+}
+
+/* Wishlist Page */
+.wishlist-table-container table thead {
+  background-color: var(--bg-secondary) !important;
+}
+
+.wishlist-table-container table thead tr th {
+  color: var(--text-secondary) !important;
+}
+
+.wishlist-table-container table tbody tr td {
+  border-bottom: 1px solid var(--bg-border) !important;
+}
+
+/* Checkout Page */
+.checkout__input input {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.checkout__input p {
+  color: var(--text-secondary) !important;
+}
+
+.checkout__order {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.checkout__order h4 {
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--bg-border) !important;
+}
+
+.checkout__order__products {
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--bg-border) !important;
+}
+
+.checkout__order__total li span {
+  color: var(--accent-color) !important;
+}
+
+/* User Settings and Profile UI */
+.profile-sidebar {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--bg-border) !important;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.profile-nav {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--bg-border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.profile-nav li {
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--bg-border-light) !important;
+}
+
+.profile-nav li:hover {
+  background: var(--bg-secondary) !important;
+  color: var(--accent-color) !important;
+}
+
+.profile-nav li.active {
+  background: var(--accent-color) !important;
+  color: #ffffff !important;
+}
+
+.profile-content {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--bg-border) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.info-box {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.info-value {
+  color: var(--text-secondary) !important;
+}
+
+.address-card {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--bg-border) !important;
+  color: var(--text-primary) !important;
+}
+
+.address-card strong {
+  color: var(--text-secondary) !important;
+}
+
+.address-card.default-card {
+  border: 2px solid var(--accent-color) !important;
+  background: var(--bg-tertiary) !important;
+}
+
+.addr-form, .settings-form {
+  background: var(--bg-secondary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.addr-form .form-group input,
+.addr-form .form-group select,
+.settings-form .form-group input {
+  background: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.settings-form .form-group input:disabled {
+  background: var(--bg-secondary) !important;
+  color: var(--text-muted) !important;
+}
+
+.order-item {
+  border: 1px solid var(--bg-border) !important;
+}
+
+.order-header {
+  background: var(--bg-secondary) !important;
+}
+
+.order-id {
+  color: var(--text-secondary) !important;
+}
+
+.order-details {
+  background: var(--bg-card) !important;
+  border-top: 1px solid var(--bg-border) !important;
+}
+
+.tracker-circle {
+  background: var(--bg-secondary) !important;
+  border: 2px solid var(--bg-border) !important;
+  color: var(--text-muted) !important;
+}
+
+.tracker-step.done .tracker-circle {
+  background: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: #ffffff !important;
+}
+
+.tracker-line {
+  background: var(--bg-border) !important;
+}
+
+.tracker-line.done {
+  background: var(--accent-color) !important;
+}
+
+.order-table th {
+  background: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+}
+
+.order-table td {
+  border-bottom: 1px solid var(--bg-border-light) !important;
+  color: var(--text-primary) !important;
+}
+
+/* User Auth Setup Pages */
+.auth-container {
+  background-color: var(--bg-secondary) !important;
+}
+
+.auth-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--bg-border) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.auth-card h3 {
+  color: var(--text-secondary) !important;
+}
+
+.auth-group label {
+  color: var(--text-secondary) !important;
+}
+
+.auth-group input {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.auth-group input:focus {
+  border-color: var(--accent-color) !important;
+}
+
+.auth-footer {
+  color: var(--text-primary) !important;
+}
+
+.auth-footer a {
+  color: var(--text-secondary) !important;
+}
+
+.otp-input {
+  background-color: var(--bg-input) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+/* Search Modal Overlay & Loader */
+.search-model {
+  background: var(--modal-overlay) !important;
+}
+
+.search-model-form input {
+  background-color: var(--bg-input) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 2px solid var(--bg-border) !important;
+}
+
+.loader-overlay {
+  background: var(--bg-primary) !important;
+}
+
+/* Cart Drawer */
+.cart-drawer-overlay {
+  background-color: var(--modal-overlay) !important;
+}
+
+.cart-drawer {
+  background-color: var(--bg-card) !important;
+  border-left: 1px solid var(--bg-border) !important;
+}
+
+.cart-drawer-header {
+  border-bottom: 1px solid var(--bg-border) !important;
+}
+
+.cart-drawer-item {
+  border-bottom: 1px solid var(--bg-border-light) !important;
+}
+
+.cart-drawer-footer {
+  border-top: 1px solid var(--bg-border) !important;
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Theme settings toggle button design */
+.theme-toggle-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.theme-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--bg-border);
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-btn:hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--text-muted);
+  transform: translateY(-1px);
+}
+
+.theme-btn.active {
+  background-color: var(--text-secondary);
+  color: var(--bg-primary);
+  border-color: var(--text-secondary);
+  box-shadow: var(--shadow-md);
+}
+
+/* Categories / Deal Section */
+.categories {
+  background-color: var(--bg-secondary) !important;
+}
+
+.categories__text h2 {
+  color: var(--text-muted) !important;
+}
+
+.categories__text h2 span {
+  color: var(--text-secondary) !important;
+}
+
+.categories__deal__countdown h2 {
+  color: var(--text-secondary) !important;
+}
+
+.categories__deal__countdown__timer .cd-item span {
+  color: var(--text-secondary) !important;
+}
+
+.categories__deal__countdown__timer .cd-item p {
+  color: var(--text-primary) !important;
+}
+
+/* Mobile Offcanvas Drawer & Hamburger Icon */
+.canvas__open i,
+.offcanvas__close i {
+  color: var(--text-secondary) !important;
+  transition: color 0.3s ease;
+}
+
+.offcanvas-menu-wrapper {
+  background-color: var(--bg-card) !important;
+  border-right: 1px solid var(--bg-border) !important;
+  box-shadow: var(--shadow-lg) !important;
+  color: var(--text-primary) !important;
+}
+
+.offcanvas__menu ul li a {
+  color: var(--text-secondary) !important;
+}
+
+.offcanvas__menu ul li a:hover,
+.offcanvas__menu ul li.active a {
+  color: var(--accent-color) !important;
+}
+
+.offcanvas__menu ul li .dropdown {
+  background-color: var(--bg-secondary) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.offcanvas__menu ul li .dropdown li a {
+  color: var(--text-primary) !important;
+}
+
+.offcanvas__links a {
+  color: var(--text-primary) !important;
+}
+
+.offcanvas__links a:hover {
+  color: var(--accent-color) !important;
+}
+
+.offcanvas__top__hover span {
+  color: var(--text-primary) !important;
+}
+
+.offcanvas__top__hover ul {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--bg-border) !important;
+}
+
+.offcanvas__top__hover ul li {
+  color: var(--text-primary) !important;
+}
+
+.offcanvas__top__hover ul li:hover {
+  color: var(--accent-color) !important;
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Header & Sidebar Action Icons / Badges / Price */
+[data-theme="dark"] .header__nav__option img,
+[data-theme="dark"] .offcanvas__nav__option img {
+  filter: invert(1) brightness(1.5) !important;
+}
+
+.header__nav__option .price,
+.offcanvas__nav__option .price {
+  color: var(--text-secondary) !important;
+  transition: color 0.3s ease;
+}
+
+.header__nav__option a span,
+.offcanvas__nav__option a span,
+.header__nav__option button span,
+.offcanvas__nav__option button span {
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-secondary) !important;
+  font-weight: 800 !important;
+  font-size: 13px !important;
+  top: -10px !important;
+  right: -8px !important;
+}
+
+/* Home Page Hero Section White Text Permanent Override */
+.hero__text h6 {
+  color: #e8c94f !important;
+}
+.hero__text h2,
+.hero__text p,
+.hero__social a,
+.hero__social span {
+  color: #ffffff !important;
+}

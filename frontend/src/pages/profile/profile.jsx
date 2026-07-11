@@ -6,8 +6,10 @@ import "./profile.css";
 import { getUserData, getAddresses, getOrdersList } from "../../api/getApiHandler/getData";
 import { apiUpdateProfile, apiAddAddress, apiUpdateAddress, apiDeleteAddress, apiCancelOrder, apiUpdateOrder } from "../../api/postApiHandler/pstData";
 import { clearSession } from "../../utils/checkUser";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function Profile({ isUserLoged, setIsUserLoged }) {
+  const { theme, updateTheme } = useTheme();
   const [getUser, setUser] = useState({});
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -641,7 +643,33 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
                       required
                     />
                   </div>
-                  <button type="submit" className="site-btn">Save Changes</button>
+                  <div className="form-group">
+                    <label>Theme Preferences</label>
+                    <div className="theme-toggle-group">
+                      <button
+                        type="button"
+                        className={`theme-btn ${theme === "light" ? "active" : ""}`}
+                        onClick={() => updateTheme("light")}
+                      >
+                        ☀️ Light
+                      </button>
+                      <button
+                        type="button"
+                        className={`theme-btn ${theme === "system" ? "active" : ""}`}
+                        onClick={() => updateTheme("system")}
+                      >
+                        💻 System
+                      </button>
+                      <button
+                        type="button"
+                        className={`theme-btn ${theme === "dark" ? "active" : ""}`}
+                        onClick={() => updateTheme("dark")}
+                      >
+                        🌙 Dark
+                      </button>
+                    </div>
+                  </div>
+                  <button type="submit" className="site-btn" style={{ marginTop: "10px" }}>Save Changes</button>
                 </form>
               </div>
             )}

@@ -179,11 +179,14 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
             <div className="col-lg-3 col-md-3">
               <div className="header__logo">
                 <Link to="/">
+                  {/* 
                   <img
                     src="/img/logo1.png"
                     alt="Shop Now Logo"
                     style={{ width: "100%", maxWidth: "180px", height: "auto", display: "block", objectFit: "contain" }}
                   />
+                */}
+                  <h3 style={{ fontFamily: "'Poppins', sans-serif", color: "var(--text-secondary)", fontWeight: "700" }}>ShopNow</h3>
                 </Link>
               </div>
             </div>
@@ -278,11 +281,7 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
 
               <div className="offcanvas__logo">
                 <Link to="/" onClick={handleLinkClick}>
-                  <img
-                    src="/img/logo1.png"
-                    alt="Logo"
-                    style={{ width: "100%", maxWidth: "180px", height: "auto", display: "block", objectFit: "contain", marginBottom: "30px" }}
-                  />
+                  <h1 style={{ fontFamily: "'Poppins', sans-serif", color: "var(--text-secondary)", fontWeight: "700", marginBottom: "30px" }}>ShopNow</h1>
                 </Link>
               </div>
 
@@ -290,7 +289,7 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
               {isUserLoged ? (
                 <div style={{
                   padding: "15px 20px",
-                  background: "#f9f9f9",
+                  background: "var(--bg-secondary)",
                   borderRadius: "8px",
                   margin: "0 0 20px 0",
                   display: "flex",
@@ -304,8 +303,8 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
                     fontSize: "18px", fontWeight: "700", flexShrink: 0
                   }}>{currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "U"}</div>
                   <div>
-                    <div style={{ fontWeight: "700", fontSize: "15px", color: "#111" }}>{currentUser?.name}</div>
-                    <div style={{ fontSize: "12px", color: "#777" }}>{currentUser?.email}</div>
+                    <div style={{ fontWeight: "700", fontSize: "15px", color: "var(--text-secondary)" }}>{currentUser?.name}</div>
+                    <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{currentUser?.email}</div>
                   </div>
                 </div>
               ) : null}

@@ -284,15 +284,17 @@ export default function CheckOut({ isUserLoged }) {
 
                 {/* Stored Address Selector Dropdown */}
                 {isUserLoged && savedAddresses.length > 0 && (
-                  <div className="checkout__input" style={{ marginBottom: "25px", border: "1px solid #e1e1e1", padding: "20px", borderRadius: "4px", backgroundColor: "#fafafa" }}>
-                    <p style={{ fontWeight: "700", marginBottom: "10px", color: "#111" }}>Deliver to saved address:</p>
+                  <div className="checkout__input" style={{ marginBottom: "25px", border: "1px solid var(--bg-border)", padding: "20px", borderRadius: "4px", backgroundColor: "var(--bg-secondary)" }}>
+                    <p style={{ fontWeight: "700", marginBottom: "10px", color: "var(--text-secondary)" }}>Deliver to saved address:</p>
                     <select
                       value={selectedAddress ? selectedAddress._id : ""}
                       onChange={(e) => handleAddressSelect(e.target.value)}
                       style={{
                         width: "100%",
                         height: "45px",
-                        border: "1px solid #e1e1e1",
+                        border: "1px solid var(--bg-border)",
+                        backgroundColor: "var(--bg-input)",
+                        color: "var(--text-primary)",
                         paddingLeft: "15px",
                         fontSize: "14px",
                         outline: "none",
