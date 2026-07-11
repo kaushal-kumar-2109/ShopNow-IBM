@@ -1,4 +1,7 @@
 const nodemailer = require("nodemailer");
+const Resend = require("resend");
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // 1. Create a transporter object using Gmail SMTP
 // const transporter = nodemailer.createTransport({
@@ -98,16 +101,37 @@ const createMailOptions = (email, otp, tag) => {
     };
 };
 
-// 3. Send the email
+
 const SendOTP = async (email, otp, tag = "signup") => {
     const mailOptions = createMailOptions(email, otp, tag);
+
     try {
-        const info = await transporter.sendMail(mailOptions);
-        return ({ status: true, message: 'Email sent successfully!', info: info.messageId });
+        const { data, error } = await resend.emails.send({
+            from: 'ShopNow Team <onboarding@resend.dev>', // Update to your domain later
+            to: [email],
+            subject: mailOptions.subject,
+            html: mailOptions.html,
+            text: mailOptions.text
+        });
+
+        if (error) throw error;
+        return { status: true, message: 'Email sent successfully!', info: data.id };
     } catch (error) {
-        console.error('Error sending email:', error);
-        return ({ status: false, message: 'Failed to send email!', info: error });
+        console.error('Error sending email via Resend:', error);
+        return { status: false, message: 'Failed to send email!', info: error };
     }
-}
+};
+
+// 3. Send the email
+// const SendOTP = async (email, otp, tag = "signup") => {
+//     const mailOptions = createMailOptions(email, otp, tag);
+//     try {
+//         const info = await transporter.sendMail(mailOptions);
+//         return ({ status: true, message: 'Email sent successfully!', info: info.messageId });
+//     } catch (error) {
+//         console.error('Error sending email:', error);
+//         return ({ status: false, message: 'Failed to send email!', info: error });
+//     }
+// }
 
 module.exports = SendOTP;
