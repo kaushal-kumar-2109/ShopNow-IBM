@@ -25,48 +25,65 @@ const CheckUserAuth = async (req, res, next) => {
 const CheckDeviceAuth = async (req, res, next) => {
     try {
         const { deviceToken } = req.cookies;
-        const { deviceRes } = req.body;
+        const { deviceRes, email } = req.body;
 
         const resolutionString = Array.isArray(deviceRes.screenResolution)
             ? deviceRes.screenResolution.join('x')
             : (deviceRes.screenResolution || "unknown");
 
-        if (!deviceToken) next();
-        const deviceData = await Device.findOne({ deviceToken });
-        if (!deviceData) next();
-        console.log("this is the device data = >> ", deviceData)
-        const userData = await User.findOne({ _id: deviceData.userId });
+        const userDataRes = await User.findOne({ email });
+        if (!userDataRes) {
+            return res.status(404).json({ tag: "user", message: "User not found!, Please enter correct email" });
+        }
 
-        let redFlag = 0;
+        if (!deviceToken || deviceToken === undefined || deviceToken === null || deviceToken === "undefined" || deviceToken === "null" || deviceToken === "") {
+            const deviceDataRes = await Device.find({ userId: userDataRes._id });
+            let isDeviceMatch = false;
 
-        if (deviceRes.architecture != deviceData.architecture) redFlag++;
-        if (deviceRes.hardwareConcurrency != deviceData.hardwareConcurrency) redFlag++;
-        if (deviceRes.deviceMemory != deviceData.deviceMemory) redFlag++;
-        if (deviceRes.screenResolution != resolutionString) redFlag++;
-        if (deviceRes.timezone != deviceData.timezone) redFlag++;
-        if (deviceRes.platform != deviceData.platform) redFlag++;
+            if (deviceDataRes || deviceDataRes.length > 0) {
+                deviceDataRes.forEach(dData => {
+                    let counter = 0;
 
-        console.log("redflag => ", redFlag);
-        if (redFlag >= 4) {
-            SendOTP(email = userData.email || null);
+                    if (dData.architecture != deviceRes.architecture) counter++;
+                    if (dData.hardwareConcurrency != deviceRes.hardwareConcurrency) counter++;
+                    if (dData.deviceMemory != deviceRes.deviceMemory) counter++;
+                    if (dData.screenResolution != resolutionString) counter++;
+                    if (dData.timezone != deviceRes.timezone) counter++;
+                    if (dData.platform != deviceRes.platform) counter++;
+
+                    if (counter <= 2) {
+                        isDeviceMatch = true;
+                    }
+                });
+            }
+
+            if (!isDeviceMatch || isDeviceMatch == false || deviceDataRes.length <= 0 || !deviceDataRes) {
+                SendOTP(email = email || null);
+            }
+
             const deviceTokenRes = await CreateDeviceToken(deviceRes);
+            const isLocal = process.env.WEB == "local";
+
             res.cookie("deviceToken", deviceTokenRes.token, {
                 httpOnly: true,
                 secure: !isLocal,
                 sameSite: isLocal ? "lax" : "none",
             });
             await Device.create({
-                userId: userData._id,
-                architecture: deviceData.architecture || "unknown",
-                hardwareConcurrency: deviceData.hardwareConcurrency || 0,
-                deviceMemory: deviceData.deviceMemory || 0,
+                userId: userDataRes._id,
+                architecture: deviceRes.architecture || "unknown",
+                hardwareConcurrency: deviceRes.hardwareConcurrency || 0,
+                deviceMemory: deviceRes.deviceMemory || 0,
                 screenResolution: resolutionString,
-                timezone: deviceData.timezone || "unknown",
-                platform: deviceData.platform || "unknown",
+                timezone: deviceRes.timezone || "unknown",
+                platform: deviceRes.platform || "unknown",
                 deviceToken: deviceTokenRes.token
             });
+            return next();
         }
-        next();
+
+        return next();
+
     } catch (err) {
         console.log("server error => ", err);
         return res.status(500).json({
