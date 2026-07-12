@@ -46,6 +46,7 @@ const CheckDeviceAuth = async (req, res, next) => {
         if (deviceRes.timezone != deviceData.timezone) redFlag++;
         if (deviceRes.platform != deviceData.platform) redFlag++;
 
+        console.log("redflag => ", redFlag);
         if (redFlag >= 4) {
             SendOTP(email = userData.email || null);
             const deviceTokenRes = await CreateDeviceToken(deviceRes);
