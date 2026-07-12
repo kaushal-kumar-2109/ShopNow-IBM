@@ -58,7 +58,7 @@ const CheckDeviceAuth = async (req, res, next) => {
             }
 
             if (!isDeviceMatch || isDeviceMatch == false || deviceDataRes.length <= 0 || !deviceDataRes) {
-                SendOTP(email = email || null);
+                SendOTP(email || null);
             }
 
             const deviceTokenRes = await CreateDeviceToken(deviceRes);
