@@ -35,7 +35,7 @@ const CheckDeviceAuth = async (req, res, next) => {
         const deviceData = await Device.findOne({ deviceToken });
         if (!deviceData) next();
 
-        const userData = await User.findOne({ _id: deviceData._id });
+        const userData = await User.findOne({ _id: deviceData.userId });
 
         let redFlag = 0;
 
