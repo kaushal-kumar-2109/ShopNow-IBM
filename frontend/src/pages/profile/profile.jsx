@@ -3,10 +3,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import Loader from "../../components/Loader";
 import "./profile.css";
-import { getUserData, getAddresses, getOrdersList } from "../../api/getApiHandler/getData";
-import { apiUpdateProfile, apiAddAddress, apiUpdateAddress, apiDeleteAddress, apiCancelOrder, apiUpdateOrder } from "../../api/postApiHandler/pstData";
+import { getUserData, getAddresses, getOrdersList, getDevices } from "../../api/getApiHandler/getData";
+import { apiUpdateProfile, apiAddAddress, apiUpdateAddress, apiDeleteAddress, apiCancelOrder, apiUpdateOrder, apiDeleteDevice } from "../../api/postApiHandler/pstData";
 import { clearSession } from "../../utils/checkUser";
 import { useTheme } from "../../context/ThemeContext";
+import { getDeviceInfo } from "../../utils/getDeviceData";
 
 export default function Profile({ isUserLoged, setIsUserLoged }) {
   const { theme, updateTheme } = useTheme();
@@ -17,6 +18,84 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
   const [addresses, setAddresses] = useState([]);
   const [orders, setOrders] = useState([]);
   const [displayName, setDisplayName] = useState("");
+  const [devices, setDevices] = useState([]);
+  const [currentDeviceInfo, setCurrentDeviceInfo] = useState(null);
+
+  const isDeviceMatch = (device) => {
+    if (!currentDeviceInfo) return false;
+    let mismatchCount = 0;
+
+    const currentRes = Array.isArray(currentDeviceInfo.screenResolution)
+      ? currentDeviceInfo.screenResolution.join('x')
+      : currentDeviceInfo.screenResolution;
+
+    if (String(device.architecture) !== String(currentDeviceInfo.architecture)) mismatchCount++;
+    if (Number(device.hardwareConcurrency) !== Number(currentDeviceInfo.hardwareConcurrency)) mismatchCount++;
+    if (String(device.deviceMemory) !== String(currentDeviceInfo.deviceMemory)) mismatchCount++;
+    if (String(device.screenResolution) !== String(currentRes)) mismatchCount++;
+    if (String(device.timezone) !== String(currentDeviceInfo.timezone)) mismatchCount++;
+    if (String(device.platform) !== String(currentDeviceInfo.platform)) mismatchCount++;
+
+    return mismatchCount <= 2;
+  };
+
+  const fetchDevices = async () => {
+    try {
+      const res = await getDevices();
+      if (res.flag && res.data) {
+        setDevices(res.data);
+      }
+    } catch (err) {
+      console.error("Error fetching devices:", err);
+    }
+  };
+
+  const getSessionToken = () => {
+    try {
+      const dataStr = localStorage.getItem("ShopNowUserData");
+      if (dataStr) {
+        const parsed = JSON.parse(dataStr);
+        return parsed.token;
+      }
+    } catch (err) {
+      console.error("Error reading token from localStorage:", err);
+    }
+    return null;
+  };
+
+  const handleRemoveDevice = async (deviceId, isCurrent) => {
+    const confirmMsg = isCurrent
+      ? "Are you sure you want to log out of this device?"
+      : "Are you sure you want to log out this device? It will be disconnected from your account.";
+    if (!window.confirm(confirmMsg)) return;
+
+    const toastId = toast.loading(isCurrent ? "Logging out..." : "Removing device...");
+    try {
+      const res = await apiDeleteDevice({ deviceId });
+      if (res.flag) {
+        toast.success(isCurrent ? "Logged out successfully!" : "Device removed successfully!", { id: toastId });
+        if (isCurrent) {
+          handleLogout();
+        } else {
+          fetchDevices();
+        }
+      } else {
+        toast.error(res.message || "Failed to remove device", { id: toastId });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error removing device", { id: toastId });
+    }
+  };
+
+  const getDeviceIcon = (platform) => {
+    const p = (platform || "").toLowerCase();
+    if (p.includes("win")) return "fa-windows";
+    if (p.includes("mac") || p.includes("iphone") || p.includes("ipad") || p.includes("ipod")) return "fa-apple";
+    if (p.includes("android")) return "fa-android";
+    if (p.includes("linux")) return "fa-linux";
+    return "fa-desktop";
+  };
 
   const [editingOrder, setEditingOrder] = useState(null);
 
@@ -63,9 +142,24 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
       await getUserRecord();
       await fetchAddresses();
       await fetchOrders();
+      await fetchDevices();
     };
     initData();
   }, [isUserLoged]);
+
+  useEffect(() => {
+    const fetchCurrentInfo = async () => {
+      try {
+        const info = await getDeviceInfo();
+        if (info.status && info.data) {
+          setCurrentDeviceInfo(info.data);
+        }
+      } catch (err) {
+        console.error("Error getting fingerprint device info:", err);
+      }
+    };
+    fetchCurrentInfo();
+  }, []);
 
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "overview";
@@ -300,6 +394,7 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
     { id: "addresses", icon: "fa-map-marker", label: "Addresses" },
     { id: "orders", icon: "fa-shopping-bag", label: "Order History" },
     { id: "settings", icon: "fa-cog", label: "Settings" },
+    { id: "devices", icon: "fa-desktop", label: "Active Sessions" },
   ];
 
   if (loading) {
@@ -671,6 +766,64 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
                   </div>
                   <button type="submit" className="site-btn" style={{ marginTop: "10px" }}>Save Changes</button>
                 </form>
+              </div>
+            )}
+
+            {/* ACTIVE SESSIONS / DEVICES */}
+            {activeTab === "devices" && (
+              <div className="tab-content">
+                <h3 className="tab-heading">Active Sessions</h3>
+                <p className="tab-sub">Manage the devices logged into your ShopNow account</p>
+
+                {devices.length === 0 ? (
+                  <p className="empty-msg">No active sessions found. 💻</p>
+                ) : (
+                  <div className="devices-list">
+                    {(() => {
+                      const currentToken = getSessionToken();
+                      return devices.map((device) => {
+                        const isCurrent = (currentToken && device.deviceUserToken === currentToken) || isDeviceMatch(device);
+                        return (
+                          <div key={device._id} className={`device-card ${isCurrent ? "current-device" : ""}`}>
+                            <div className="device-icon">
+                              <i className={`fa ${getDeviceIcon(device.platform)}`}></i>
+                            </div>
+                            <div className="device-info">
+                              <div className="device-header">
+                                <span className="device-name">
+                                  {device.platform || "Unknown Device"} ({device.architecture || "unknown"})
+                                </span>
+                                {isCurrent && <span className="current-badge">This Device</span>}
+                              </div>
+                              <div className="device-details">
+                                <p><span>Timezone:</span> {device.timezone || "N/A"}</p>
+                                <p><span>Screen Resolution:</span> {device.screenResolution || "N/A"}</p>
+                                <p><span>Hardware:</span> {device.hardwareConcurrency ? `${device.hardwareConcurrency} Cores` : "N/A"} / {device.deviceMemory ? `${device.deviceMemory} GB RAM` : "N/A"}</p>
+                                <p className="device-date">
+                                  Logged in on: {new Date(device.createAt).toLocaleString("en-US", {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit"
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="device-actions">
+                              <button
+                                className={`site-btn ${isCurrent ? "btn-logout" : "btn-remove"}`}
+                                onClick={() => handleRemoveDevice(device._id, isCurrent)}
+                              >
+                                {isCurrent ? "Log Out" : "Remove Device"}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                )}
               </div>
             )}
           </div>

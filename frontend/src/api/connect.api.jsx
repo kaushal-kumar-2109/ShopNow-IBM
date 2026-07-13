@@ -1,4 +1,4 @@
-const WEB_PATH = "http://localhost:3000";
+const WEB_PATH = "https://shopnow-ibm.onrender.com";
 // "https://shopnow-ibm.onrender.com";
 // || "http://localhost:3000" || "http://192.168.1.18:3000";
 const MAIN_SUB_WEB_URL = "/ShopNow/api";
@@ -30,10 +30,12 @@ const ROUTERS = {
         getCart: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-cart`,
         getWishlist: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-wishlist`,
         getAddress: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-address`,
-        getOrders: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-orders`
+        getOrders: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-orders`,
+        getDevice: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-device`
     },
     PUT_ROUTE: {
-        updatePassword: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-password`
+        updatePassword: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-password`,
+        deleteDevice: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/delete-device`
     }
 };
 

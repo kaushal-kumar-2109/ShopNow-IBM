@@ -70,5 +70,10 @@ const getOrdersList = async () => {
     return await GetDataCall(ROUTERS.GET_ROUTE.getOrders);
 }
 
-export { getUserData, getLatestProduct, getProductsByCategory, getLatestProducts, getBannerProducts, getProductById, getProductComments, getCart, getWishlist, getAllShopProducts, getAddresses, getOrdersList };
+// Fetch user's active login devices
+const getDevices = async () => {
+    return await GetDataCall(ROUTERS.GET_ROUTE.getDevice);
+}
+
+export { getUserData, getLatestProduct, getProductsByCategory, getLatestProducts, getBannerProducts, getProductById, getProductComments, getCart, getWishlist, getAllShopProducts, getAddresses, getOrdersList, getDevices };
 

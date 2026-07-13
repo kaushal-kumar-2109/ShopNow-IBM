@@ -69,4 +69,9 @@ const apiUpdateOrder = async (id, data) => {
     return await PostDataCall(`${ROUTERS.POST_ROUTE.updateOrder}/${id}`, data);
 }
 
-export { sendOtp, createUser, setUser, updateUserPassword, postComment, apiAddToCart, apiUpdateCartQuantity, apiRemoveFromCart, apiClearCart, apiToggleWishlist, apiUpdateProfile, apiAddAddress, apiUpdateAddress, apiDeleteAddress, apiPlaceOrder, apiCancelOrder, apiUpdateOrder };
+// Delete/logout active device session
+const apiDeleteDevice = async (data) => {
+    return await PostDataCall(ROUTERS.PUT_ROUTE.deleteDevice, data);
+}
+
+export { sendOtp, createUser, setUser, updateUserPassword, postComment, apiAddToCart, apiUpdateCartQuantity, apiRemoveFromCart, apiClearCart, apiToggleWishlist, apiUpdateProfile, apiAddAddress, apiUpdateAddress, apiDeleteAddress, apiPlaceOrder, apiCancelOrder, apiUpdateOrder, apiDeleteDevice };
