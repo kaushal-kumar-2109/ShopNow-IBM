@@ -1,6 +1,5 @@
-const WEB_PATH = "https://shopnow-ibm.onrender.com";
-// "https://shopnow-ibm.onrender.com";
-// || "http://localhost:3000" || "http://192.168.1.18:3000";
+const WEB_PATH = import.meta.env.VITE_BACKEND_API;
+
 const MAIN_SUB_WEB_URL = "/ShopNow/api";
 
 const ROUTERS = {
