@@ -100,7 +100,8 @@ const CreateUser = async (req, res) => {
                 screenResolution: resolutionString,
                 timezone: deviceData.timezone || "unknown",
                 platform: deviceData.platform || "unknown",
-                deviceToken: deviceToken.token
+                deviceToken: deviceToken.token,
+                deviceUserToken: response.token
             });
 
             return res.status(201).json({ message: "User created successfully", token: response.token });

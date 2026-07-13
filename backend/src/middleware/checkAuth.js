@@ -24,7 +24,7 @@ const CheckUserAuth = async (req, res, next) => {
 
 const CheckDeviceAuth = async (req, res, next) => {
     try {
-        const { deviceToken } = req.cookies;
+        const { deviceToken, jwtoken } = req.cookies;
         const { deviceRes, email } = req.body;
 
         const resolutionString = Array.isArray(deviceRes.screenResolution)
@@ -77,7 +77,8 @@ const CheckDeviceAuth = async (req, res, next) => {
                 screenResolution: resolutionString,
                 timezone: deviceRes.timezone || "unknown",
                 platform: deviceRes.platform || "unknown",
-                deviceToken: deviceTokenRes.token
+                deviceToken: deviceTokenRes.token,
+                deviceUserToken: jwtoken
             });
             return next();
         }

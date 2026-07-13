@@ -5,6 +5,7 @@ const { GetLanProduct, GetProductById, GetProductComments } = require("../handle
 const { GetCart, GetWishlist } = require("../handler/cartWishlist.handler");
 const { GetAddresses } = require("../handler/address.handler");
 const { GetOrders } = require("../handler/order.handler");
+const { GetDevice } = require("../handler/device.handler");
 
 const router = express.Router();
 
@@ -17,5 +18,6 @@ router.route("/get-cart").get(CheckUserAuth, GetCart);
 router.route("/get-wishlist").get(CheckUserAuth, GetWishlist);
 router.route("/get-address").get(CheckUserAuth, GetAddresses);
 router.route("/get-orders").get(CheckUserAuth, GetOrders);
+router.route("/get-device").get(CheckUserAuth, GetDevice);
 
 module.exports = router;

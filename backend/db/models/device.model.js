@@ -31,6 +31,11 @@ const deviceSchema = new mongoose.Schema({
         type: String,
         require: true
     },
+    deviceUserToken: {
+        type: String,
+        require: true,
+        ref: "Token"
+    },
     createAt: {
         type: Date,
         default: Date.now()
