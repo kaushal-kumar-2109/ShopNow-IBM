@@ -42,7 +42,14 @@ cd backend
 npm install
 ```
 
-### Configure Environment Variables
+### Configure Environment Variables backend
+Copy the configuration template to create your `.env` file:
+```bash
+cp env.example .env
+```
+Open the `.env` file and fill in your database, email, and JWT secret credentials (see the [Environment Configurations](#environment-configurations-env) section below for details).
+
+### Configure Environment Variables frontend
 Copy the configuration template to create your `.env` file:
 ```bash
 cp env.example .env
