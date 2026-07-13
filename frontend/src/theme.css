@@ -792,3 +792,66 @@ input:focus, select:focus, textarea:focus {
 .hero__social span {
   color: #ffffff !important;
 }
+
+/* ==========================================================================
+   Header and Mobile Sidebar Layout & Responsiveness Fixes
+   ========================================================================== */
+
+/* Reset button styling inside desktop header and mobile sidebar actions */
+.header__nav__option button,
+.offcanvas__nav__option button {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  vertical-align: middle !important;
+  transition: transform 0.2s ease, opacity 0.2s ease !important;
+}
+
+.header__nav__option button:hover,
+.offcanvas__nav__option button:hover {
+  transform: scale(1.08);
+  opacity: 0.9;
+}
+
+.header__nav__option button img,
+.offcanvas__nav__option button img {
+  display: block;
+}
+
+/* Fix spacing in mobile sidebar navigation options */
+.offcanvas__nav__option {
+  display: flex !important;
+  align-items: center !important;
+  gap: 20px !important;
+  margin-bottom: 30px !important;
+}
+
+.offcanvas__nav__option a,
+.offcanvas__nav__option button {
+  margin: 0 !important;
+}
+
+.offcanvas__nav__option .price {
+  margin: 0 !important;
+  margin-left: auto !important; /* Push price to the right */
+}
+
+/* Disable CSS transitions to prevent lag/jitter conflicts with Framer Motion */
+.offcanvas-menu-wrapper,
+.offcanvas-menu-overlay {
+  transition: none !important;
+}
+
+/* Ensure backdrop overlay occupies full screen and behaves correctly when mounted */
+.offcanvas-menu-overlay {
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+

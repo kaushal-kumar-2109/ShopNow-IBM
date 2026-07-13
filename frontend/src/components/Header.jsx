@@ -281,7 +281,7 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
 
               <div className="offcanvas__logo">
                 <Link to="/" onClick={handleLinkClick}>
-                  <h1 style={{ fontFamily: "'Poppins', sans-serif", color: "var(--text-secondary)", fontWeight: "700", marginBottom: "30px" }}>ShopNow</h1>
+                  <h3 style={{ fontFamily: "'Poppins', sans-serif", color: "var(--text-secondary)", fontWeight: "700", marginBottom: "30px", fontSize: "24px" }}>ShopNow</h3>
                 </Link>
               </div>
 
@@ -294,7 +294,8 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
                   margin: "0 0 20px 0",
                   display: "flex",
                   alignItems: "center",
-                  gap: "12px"
+                  gap: "12px",
+                  overflow: "hidden"
                 }}>
                   <div style={{
                     width: "40px", height: "40px", borderRadius: "50%",
@@ -302,9 +303,22 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: "18px", fontWeight: "700", flexShrink: 0
                   }}>{currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : "U"}</div>
-                  <div>
-                    <div style={{ fontWeight: "700", fontSize: "15px", color: "var(--text-secondary)" }}>{currentUser?.name}</div>
-                    <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{currentUser?.email}</div>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{
+                      fontWeight: "700",
+                      fontSize: "15px",
+                      color: "var(--text-secondary)",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis"
+                    }}>{currentUser?.name}</div>
+                    <div style={{
+                      fontSize: "12px",
+                      color: "var(--text-muted)",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis"
+                    }} title={currentUser?.email}>{currentUser?.email}</div>
                   </div>
                 </div>
               ) : null}
