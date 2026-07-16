@@ -1,10 +1,11 @@
 const jwt = require("jsonwebtoken");
 
-const CreateUserToken = async (name, email, role = "USER") => {
+const CreateUserToken = async (id,name, email, role = "USER") => {
     const userPayload = {
-        role: role,
-        name: name,
-        email: email,
+        role,
+        name,
+        email,
+        id
     };
     try {
         // Generate the token

@@ -58,6 +58,7 @@ const CreateUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ name, email, password: hashedPassword });
         await Otp.deleteOne({ email });
+        await newUser.save();
 
         // 5. Safe Extraction of Device Variables (Prevents Server Crashes if missing)
         const deviceData = deviceRes || {};
@@ -67,7 +68,7 @@ const CreateUser = async (req, res) => {
 
         // 6. Token Generation
         const deviceToken = await CreateDeviceToken(deviceRes);
-        const response = await CreateUserToken(name, email, "USER");
+        const response = await CreateUserToken(newUser._id,name, email, "USER");
 
         if (response.status) {
             const isLocal = process.env.WEB === "local";
@@ -86,7 +87,6 @@ const CreateUser = async (req, res) => {
                 sameSite: isLocal ? "lax" : "none",
             });
 
-            await newUser.save();
             // 8. Clean up Old User Authorization Tokens
             await Token.deleteOne({ email });
             await Token.create({ token: response.token, email: email });

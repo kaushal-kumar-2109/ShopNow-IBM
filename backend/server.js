@@ -3,15 +3,18 @@ require("./db/connect.js");
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+
+const AppError = require("./src/utils/errorMessage.js");
 const getRouter = require("./src/router/get.router.js");
 const postRouter = require("./src/router/post.router.js");
 const putRouter = require("./src/router/put.router.js");
+const errorHandler = require("./src/handler/error.handler.js");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors({
-    origin: ['https://shop-now-neon.vercel.app', 'http://localhost:5173','smtp.gmail.com','https://shopnow-ibm.onrender.com'],
+    origin: ['https://shop-now-neon.vercel.app', 'http://localhost:5173','https://shopnow-ibm.onrender.com'],
     credentials: true
 }));
 app.use(cookieParser());
@@ -20,10 +23,15 @@ app.use(express.json());
 app.use("/ShopNow/api/get", getRouter);
 app.use("/ShopNow/api/post", postRouter);
 app.use("/ShopNow/api/put", putRouter);
+app.use(errorHandler);
 
 // Example route
 app.get("/ShopNow", (req, res) => {
     res.send("Welcome to the ShopNow backend!");
+});
+
+app.all('/*any', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
 app.listen(PORT, () => {
