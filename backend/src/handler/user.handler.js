@@ -140,7 +140,7 @@ const SetUser = async (req, res) => {
             });
 
             const oldToken = await Token.findOne({ email });
-            if (oldToken) await Token.deleteOne({ email });
+            // if (oldToken) await Token.deleteOne({ email });
 
             await Token.create({
                 token: response.token,
