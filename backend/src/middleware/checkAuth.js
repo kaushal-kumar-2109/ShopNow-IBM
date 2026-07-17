@@ -61,26 +61,26 @@ const CheckDeviceAuth = async (req, res, next) => {
                 SendOTP(email || null);
             }
 
-            const deviceTokenRes = await CreateDeviceToken(deviceRes);
-            const isLocal = process.env.WEB == "local";
+            // const deviceTokenRes = await CreateDeviceToken(deviceRes);
+            // const isLocal = process.env.WEB == "local";
 
-            res.cookie("deviceToken", deviceTokenRes.token, {
-                httpOnly: true,
-                secure: !isLocal,
-                sameSite: isLocal ? "lax" : "none",
-            });
-            let dd = {
-                userId: userDataRes._id,
-                architecture: deviceRes.architecture || "unknown",
-                hardwareConcurrency: deviceRes.hardwareConcurrency || 0,
-                deviceMemory: deviceRes.deviceMemory || 0,
-                screenResolution: resolutionString,
-                timezone: deviceRes.timezone || "unknown",
-                platform: deviceRes.platform || "unknown",
-                deviceToken: deviceTokenRes.token,
-                deviceUserToken: "NA"
-            };
-            req.deviceTokenData = dd;
+            // res.cookie("deviceToken", deviceTokenRes.token, {
+            //     httpOnly: true,
+            //     secure: !isLocal,
+            //     sameSite: isLocal ? "lax" : "none",
+            // });
+            // let dd = {
+            //     userId: userDataRes._id,
+            //     architecture: deviceRes.architecture || "unknown",
+            //     hardwareConcurrency: deviceRes.hardwareConcurrency || 0,
+            //     deviceMemory: deviceRes.deviceMemory || 0,
+            //     screenResolution: resolutionString,
+            //     timezone: deviceRes.timezone || "unknown",
+            //     platform: deviceRes.platform || "unknown",
+            //     deviceToken: deviceTokenRes.token,
+            //     deviceUserToken: "NA"
+            // };
+            // req.deviceTokenData = dd;
             return next();
         }
 
