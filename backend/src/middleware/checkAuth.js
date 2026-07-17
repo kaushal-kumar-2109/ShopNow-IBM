@@ -51,7 +51,7 @@ const CheckDeviceAuth = async (req, res, next) => {
                     if (dData.timezone != deviceRes.timezone) counter++;
                     if (dData.platform != deviceRes.platform) counter++;
 
-                    if (counter <= 2) {
+                    if (counter <= 1) {
                         isDeviceMatch = true;
                     }
                 });
