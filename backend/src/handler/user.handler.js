@@ -120,6 +120,10 @@ const SetUser = async (req, res) => {
 
         const { email, password, deviceRes } = req.body;
 
+        const resolutionString = Array.isArray(deviceRes.screenResolution)
+            ? deviceRes.screenResolution.join('x')
+            : (deviceRes.screenResolution || "unknown");
+
         if (!email) return res.status(400).json({ tag: "email", message: "Email is required" });
         if (!password) return res.status(400).json({ tag: "password", message: "Password is required" });
 
@@ -130,6 +134,7 @@ const SetUser = async (req, res) => {
         if (!isValide) return res.status(400).json({ tag: "password", message: "Password is not valid" });
 
         const response = await CreateUserToken(user.name, user.email, "USER");
+        const deviceTokenRes = await CreateDeviceToken(deviceRes);
         if (response.status) {
             // res.clearCookie('token');
             res.cookie("jwtoken", response.token, {
@@ -138,20 +143,33 @@ const SetUser = async (req, res) => {
                 sameSite: (process.env.WEB === "local") ? "lax" : "none",
                 maxAge: 7 * 24 * 60 * 60 * 1000
             });
-
-            const oldToken = await Token.findOne({ email });
-            // if (oldToken) await Token.deleteOne({ email });
-
-            await Token.create({
-                token: response.token,
-                email: email
+            res.cookie("deviceToken", deviceTokenRes.token, {
+                httpOnly: true,
+                secure: (process.env.WEB === "local") ? false : true,
+                sameSite: (process.env.WEB === "local") ? "lax" : "none",
+                maxAge: 7 * 24 * 60 * 60 * 1000
             });
 
-            const deviceTokenJson = req.deviceTokenData;
-            if (deviceTokenJson && typeof deviceTokenJson === "object") {
-                deviceTokenJson.deviceUserToken = response.token;
-                await Device.create(deviceTokenJson);
-            }
+            // const oldToken = await Token.findOne({ email });
+            // if (oldToken) await Token.deleteOne({ email });
+
+            await Token.create({token: response.token,email: email});
+            await Device.create({
+                userId: user._id,
+                architecture: deviceRes.architecture || "unknown",
+                hardwareConcurrency: deviceRes.hardwareConcurrency || 0,
+                deviceMemory: deviceRes.deviceMemory || 0,
+                screenResolution: resolutionString,
+                timezone: deviceRes.timezone || "unknown",
+                platform: deviceRes.platform || "unknown",
+                deviceToken: deviceTokenRes.token,
+                deviceUserToken: response.token
+            });
+            // const deviceTokenJson = req.deviceTokenData;
+            // if (deviceTokenJson && typeof deviceTokenJson === "object") {
+            //     deviceTokenJson.deviceUserToken = response.token;
+            //     await Device.create(deviceTokenJson);
+            // }
 
             return res.status(201).json({ message: "User login successfully", token: response.token, name: user.name });
         } else {
