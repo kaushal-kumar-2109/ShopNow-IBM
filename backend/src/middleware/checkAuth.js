@@ -69,7 +69,7 @@ const CheckDeviceAuth = async (req, res, next) => {
                 secure: !isLocal,
                 sameSite: isLocal ? "lax" : "none",
             });
-            req.deviceTokenData = {
+            let dd = {
                 userId: userDataRes._id,
                 architecture: deviceRes.architecture || "unknown",
                 hardwareConcurrency: deviceRes.hardwareConcurrency || 0,
@@ -79,7 +79,8 @@ const CheckDeviceAuth = async (req, res, next) => {
                 platform: deviceRes.platform || "unknown",
                 deviceToken: deviceTokenRes.token,
                 deviceUserToken: "NA"
-            }
+            };
+            req.deviceTokenData = dd;
             return next();
         }
 

@@ -146,8 +146,13 @@ const SetUser = async (req, res) => {
                 token: response.token,
                 email: email
             });
-            req.deviceTokenData.deviceUserToken = response.token;
-            await Device.create(req.deviceTokenData);
+
+            const deviceTokenJson = req.deviceTokenData;
+            if (deviceTokenJson && typeof deviceTokenJson === "object") {
+                deviceTokenJson.deviceUserToken = response.token;
+                await Device.create(deviceTokenJson);
+            }
+
             return res.status(201).json({ message: "User login successfully", token: response.token, name: user.name });
         } else {
             return res.status(401).json({ tag: "token", message: "Token is not created" });
