@@ -228,7 +228,7 @@ const getTemplateParams = (email, otp, tag) => {
         headingText = isSignup ? 'Verify Your Account' : 'Welcome Back!';
         actionText = isSignup ? 'creating your ShopNow account' : 'recover your ShopNow account';
     }
-    const htmlBody = otp ? CREATE_OTP_BODY(otp, headingText, actionText) : CREATE_WARNING_BODY(email);
+    const htmlBody = (otp || otp!=null) ? CREATE_OTP_BODY(otp, headingText, actionText) : CREATE_WARNING_BODY(email);
     return {
         // These keys must match the exact {{variable_names}} you typed in your  template
         to_email: email,
