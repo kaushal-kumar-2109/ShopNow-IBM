@@ -9,17 +9,12 @@ const ROUTERS = {
         setUser: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/set-user`,
         postComment: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/post-comment`,
         addToCart: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/add-to-cart`,
-        updateCartQuantity: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/update-cart-quantity`,
         removeFromCart: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/remove-from-cart`,
         clearCart: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/clear-cart`,
         toggleWishlist: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/toggle-wishlist`,
-        updateProfile: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/update-profile`,
         addAddress: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/add-address`,
-        updateAddress: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/update-address`,
-        deleteAddress: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/delete-address`,
         placeOrder: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/place-order`,
         cancelOrder: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/cancel-order`,
-        updateOrder: `${WEB_PATH}${MAIN_SUB_WEB_URL}/post/update-order`
     },
     GET_ROUTE: {
         getUser: `${WEB_PATH}${MAIN_SUB_WEB_URL}/get/get-user`,
@@ -34,7 +29,12 @@ const ROUTERS = {
     },
     PUT_ROUTE: {
         updatePassword: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-password`,
-        deleteDevice: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/delete-device`
+        deleteDevice: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/delete-device`,
+        updateProfile: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-profile`,
+        updateAddress: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-address`,
+        updateOrder: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-order`,
+        deleteAddress: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/delete-address`,
+        updateCartQuantity: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-cart-quantity`
     }
 };
 

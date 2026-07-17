@@ -26,7 +26,7 @@ const apiAddToCart = async (data) => {
 }
 
 const apiUpdateCartQuantity = async (data) => {
-    return await PostDataCall(ROUTERS.POST_ROUTE.updateCartQuantity, data);
+    return await PostDataCall(ROUTERS.PUT_ROUTE.updateCartQuantity, data);
 }
 
 const apiRemoveFromCart = async (data) => {
@@ -42,7 +42,7 @@ const apiToggleWishlist = async (data) => {
 }
 
 const apiUpdateProfile = async (data) => {
-    return await PostDataCall(ROUTERS.POST_ROUTE.updateProfile, data);
+    return await PostDataCall(ROUTERS.PUT_ROUTE.updateProfile, data);
 }
 
 const apiAddAddress = async (data) => {
@@ -50,11 +50,11 @@ const apiAddAddress = async (data) => {
 }
 
 const apiUpdateAddress = async (id, data) => {
-    return await PostDataCall(`${ROUTERS.POST_ROUTE.updateAddress}/${id}`, data);
+    return await PostDataCall(`${ROUTERS.PUT_ROUTE.updateAddress}/${id}`, data);
 }
 
 const apiDeleteAddress = async (id) => {
-    return await PostDataCall(`${ROUTERS.POST_ROUTE.deleteAddress}/${id}`, {});
+    return await PostDataCall(`${ROUTERS.PUT_ROUTE.deleteAddress}/${id}`, {});
 }
 
 const apiPlaceOrder = async (data) => {
@@ -66,7 +66,7 @@ const apiCancelOrder = async (id) => {
 }
 
 const apiUpdateOrder = async (id, data) => {
-    return await PostDataCall(`${ROUTERS.POST_ROUTE.updateOrder}/${id}`, data);
+    return await PostDataCall(`${ROUTERS.PUT_ROUTE.updateOrder}/${id}`, data);
 }
 
 // Delete/logout active device session
@@ -74,4 +74,4 @@ const apiDeleteDevice = async (data) => {
     return await PostDataCall(ROUTERS.PUT_ROUTE.deleteDevice, data);
 }
 
-export { sendOtp, createUser, setUser, updateUserPassword, postComment, apiAddToCart, apiUpdateCartQuantity, apiRemoveFromCart, apiClearCart, apiToggleWishlist, apiUpdateProfile, apiAddAddress, apiUpdateAddress, apiDeleteAddress, apiPlaceOrder, apiCancelOrder, apiUpdateOrder, apiDeleteDevice };
+export { sendOtp, createUser, setUser, updateUserPassword, postComment, apiAddToCart, apiUpdateCartQuantity, apiRemoveFromCart, apiClearCart, apiToggleWishlist, apiUpdateProfile, apiAddAddress, apiUpdateAddress, apiDeleteAddress, apiPlaceOrder, apiCancelOrder, apiUpdateOrder, apiDeleteDevice };

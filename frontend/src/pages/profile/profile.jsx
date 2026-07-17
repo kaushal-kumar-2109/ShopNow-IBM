@@ -298,6 +298,7 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
     const toastId = toast.loading("Saving changes...");
     try {
       const res = await apiUpdateProfile({ name: displayName });
+      console.log(res);
       if (res.flag && res.data) {
         toast.success("Profile updated!", { id: toastId });
         setUser(res.data);

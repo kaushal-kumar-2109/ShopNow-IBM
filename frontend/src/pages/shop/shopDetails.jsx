@@ -389,7 +389,7 @@ export default function ShopDetails({ isUserLoged }) {
       </section>
 
       {/* ══ Comments Section ══ */}
-      <section style={{ background: "#fafafa", borderTop: "1px solid #eee", padding: "60px 0" }}>
+      <section style={{ background: "var(--bg-secondary)", borderTop: "1px solid var(--bg-border)", padding: "60px 0" }}>
         <div className="container">
           <div className="row">
             <div className="col-lg-8 offset-lg-2">
@@ -399,16 +399,16 @@ export default function ShopDetails({ isUserLoged }) {
                 <span style={{ color: "#e53637", fontWeight: "700", textTransform: "uppercase", fontSize: "13px", letterSpacing: "2px", display: "block", marginBottom: "8px" }}>
                   Reviews &amp; Feedback
                 </span>
-                <h2 style={{ fontWeight: "700", color: "#111", fontSize: "28px" }}>
+                <h2 style={{ fontWeight: "700", color: "var(--text-secondary)", fontSize: "28px" }}>
                   Customer Reviews
-                  <span style={{ fontSize: "15px", color: "#888", fontWeight: "400", marginLeft: "12px" }}>({commentsTotal})</span>
+                  <span style={{ fontSize: "15px", color: "var(--text-muted)", fontWeight: "400", marginLeft: "12px" }}>({commentsTotal})</span>
                 </h2>
               </div>
 
               {/* Comments list */}
               <div style={{ marginBottom: "40px" }}>
                 {comments.length === 0 && !commentsLoading && (
-                  <p style={{ color: "#aaa", fontStyle: "italic", padding: "20px 0" }}>
+                  <p style={{ color: "var(--text-muted)", fontStyle: "italic", padding: "20px 0" }}>
                     No reviews yet. Be the first to leave one below!
                   </p>
                 )}
@@ -421,7 +421,7 @@ export default function ShopDetails({ isUserLoged }) {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.25, delay: Math.min(idx * 0.04, 0.3) }}
-                      style={{ display: "flex", gap: "14px", padding: "18px 0", borderBottom: "1px solid #efefef" }}
+                      style={{ display: "flex", gap: "14px", padding: "18px 0", borderBottom: "1px solid var(--bg-border-light)" }}
                     >
                       {/* Avatar */}
                       <div style={{
@@ -437,20 +437,20 @@ export default function ShopDetails({ isUserLoged }) {
                       <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
                           <h6 style={{ fontWeight: "700", margin: 0, fontSize: "14px" }}>{c.user_name || "Guest"}</h6>
-                          <span style={{ fontSize: "11px", color: "#bbb" }}>
+                          <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
                             {c.created_at
                               ? new Date(c.created_at).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })
                               : ""}
                           </span>
                         </div>
-                        <p style={{ fontSize: "14px", color: "#555", margin: 0, lineHeight: "1.6" }}>{c.comment}</p>
+                        <p style={{ fontSize: "14px", color: "var(--text-primary)", margin: 0, lineHeight: "1.6" }}>{c.comment}</p>
                       </div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
 
                 {commentsLoading && (
-                  <p style={{ textAlign: "center", color: "#aaa", padding: "16px 0" }}>Loading reviews…</p>
+                  <p style={{ textAlign: "center", color: "var(--text-muted)", padding: "16px 0" }}>Loading reviews…</p>
                 )}
 
                 {hasMore && !commentsLoading && (
@@ -458,12 +458,13 @@ export default function ShopDetails({ isUserLoged }) {
                     onClick={handleLoadMore}
                     style={{
                       marginTop: "20px", padding: "10px 28px",
-                      border: "1px solid #ddd", background: "#fff",
+                      border: "1px solid var(--bg-border)", background: "var(--bg-card)",
                       cursor: "pointer", fontWeight: "700",
                       fontSize: "13px", letterSpacing: "1px", textTransform: "uppercase",
+                      color: "var(--text-secondary)",
                     }}
-                    onMouseEnter={(e) => { e.target.style.background = "#111"; e.target.style.color = "#fff"; e.target.style.borderColor = "#111"; }}
-                    onMouseLeave={(e) => { e.target.style.background = "#fff"; e.target.style.color = "#111"; e.target.style.borderColor = "#ddd"; }}
+                    onMouseEnter={(e) => { e.target.style.background = "var(--accent-color)"; e.target.style.color = "#fff"; e.target.style.borderColor = "var(--accent-color)"; }}
+                    onMouseLeave={(e) => { e.target.style.background = "var(--bg-card)"; e.target.style.color = "var(--text-secondary)"; e.target.style.borderColor = "var(--bg-border)"; }}
                   >
                     Load More ({commentsTotal - comments.length} remaining)
                   </button>
@@ -472,9 +473,9 @@ export default function ShopDetails({ isUserLoged }) {
 
               {/* ── Post Comment Form ── */}
               <div style={{
-                border: "1px solid #e8e8e8", borderRadius: "6px",
-                padding: "30px", background: "#fff",
-                boxShadow: "0 2px 20px rgba(0,0,0,0.04)",
+                border: "1px solid var(--bg-border)", borderRadius: "6px",
+                padding: "30px", background: "var(--bg-card)",
+                boxShadow: "var(--shadow-sm)",
               }}>
                 <h5 style={{ fontWeight: "700", marginBottom: "6px", fontSize: "18px" }}>Leave a Review</h5>
 
@@ -482,10 +483,10 @@ export default function ShopDetails({ isUserLoged }) {
                 {!isUserLoged ? (
                   <div style={{
                     marginTop: "16px", padding: "20px",
-                    background: "#f9f9f9", border: "1px solid #eee",
+                    background: "var(--bg-secondary)", border: "1px solid var(--bg-border)",
                     borderRadius: "4px", textAlign: "center",
                   }}>
-                    <p style={{ margin: "0 0 14px", color: "#555", fontSize: "14px" }}>
+                    <p style={{ margin: "0 0 14px", color: "var(--text-primary)", fontSize: "14px" }}>
                       You must be logged in to leave a review.
                     </p>
                     <Link to="/login" className="site-btn" style={{ display: "inline-block" }}>
@@ -496,8 +497,8 @@ export default function ShopDetails({ isUserLoged }) {
                   <>
                     {/* Logged-in user chip */}
                     {loggedUser && (
-                      <p style={{ marginBottom: "14px", fontSize: "13px", color: "#777" }}>
-                        Posting as <strong style={{ color: "#111" }}>{loggedUser.name || loggedUser.email}</strong>
+                      <p style={{ marginBottom: "14px", fontSize: "13px", color: "var(--text-muted)" }}>
+                        Posting as <strong style={{ color: "var(--text-secondary)" }}>{loggedUser.name || loggedUser.email}</strong>
                       </p>
                     )}
 
@@ -510,12 +511,13 @@ export default function ShopDetails({ isUserLoged }) {
                           onChange={(e) => setCommentText(e.target.value)}
                           required
                           style={{
-                            width: "100%", border: "1px solid #e1e1e1",
+                            width: "100%", border: "1px solid var(--bg-border)",
                             padding: "14px", fontSize: "14px", borderRadius: "3px",
                             outline: "none", resize: "vertical", lineHeight: "1.6",
+                            background: "var(--bg-input)", color: "var(--text-primary)",
                           }}
-                          onFocus={(e)  => (e.target.style.borderColor = "#111")}
-                          onBlur={(e)   => (e.target.style.borderColor = "#e1e1e1")}
+                          onFocus={(e)  => (e.target.style.borderColor = "var(--accent-color)")}
+                          onBlur={(e)   => (e.target.style.borderColor = "var(--bg-border)")}
                         />
                       </div>
 
