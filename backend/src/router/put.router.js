@@ -2,7 +2,7 @@
 const express = require("express");
 
 // ------------------------- requiring other files -------------------------
-const { UpdateUserPassword } = require("../handler/user.handler");
+const { UpdateUserPassword, LogoutUser } = require("../handler/user.handler");
 const { CheckUserAuth, CheckDeviceAuth } = require("../middleware/checkAuth");
 const { UpdateProfile } = require("../handler/user.handler");
 const { UpdateCartQuantity } = require("../handler/cartWishlist.handler");
@@ -22,5 +22,6 @@ router.route("/update-address/:id").post(CheckUserAuth, UpdateAddress); // --- u
 router.route("/update-order/:id").post(CheckUserAuth, UpdateOrder); // --- update the order
 router.route("/delete-device").post(CheckUserAuth, DeleteDevice); // --- logout from other device
 router.route("/delete-address/:id").post(CheckUserAuth, DeleteAddress); // --- delete the user address 
+router.route("/logot-user").post(LogoutUser); // --- delete the user token
 
 module.exports = router;

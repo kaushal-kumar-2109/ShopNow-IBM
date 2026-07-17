@@ -4,6 +4,7 @@ import { useShop } from "../context/ShopContext";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import { clearSession } from "../utils/checkUser";
+import { LogoutUser } from "../api/postApiHandler/pstData";
 
 export default function Header({ isUserLoged, setIsUserLoged }) {
   const {
@@ -43,7 +44,12 @@ export default function Header({ isUserLoged, setIsUserLoged }) {
     setMobileMenuOpen(false);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const logoutRes = await LogoutUser({});
+    if(logoutRes.flag == false){
+      toast.error(logoutRes.data.message);
+      return;
+    }
     clearSession();
     setIsUserLoged(false);
     setUserDropdownOpen(false);

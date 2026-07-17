@@ -34,7 +34,8 @@ const ROUTERS = {
         updateAddress: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-address`,
         updateOrder: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-order`,
         deleteAddress: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/delete-address`,
-        updateCartQuantity: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-cart-quantity`
+        updateCartQuantity: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/update-cart-quantity`,
+        logoutUser: `${WEB_PATH}${MAIN_SUB_WEB_URL}/put/logot-user`
     }
 };
 

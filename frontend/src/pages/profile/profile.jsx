@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import Loader from "../../components/Loader";
 import "./profile.css";
 import { getUserData, getAddresses, getOrdersList, getDevices } from "../../api/getApiHandler/getData";
-import { apiUpdateProfile, apiAddAddress, apiUpdateAddress, apiDeleteAddress, apiCancelOrder, apiUpdateOrder, apiDeleteDevice } from "../../api/postApiHandler/pstData";
+import { apiUpdateProfile, apiAddAddress, apiUpdateAddress, apiDeleteAddress, apiCancelOrder, apiUpdateOrder, apiDeleteDevice, LogoutUser } from "../../api/postApiHandler/pstData";
 import { clearSession } from "../../utils/checkUser";
 import { useTheme } from "../../context/ThemeContext";
 import { getDeviceInfo } from "../../utils/getDeviceData";
@@ -298,7 +298,6 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
     const toastId = toast.loading("Saving changes...");
     try {
       const res = await apiUpdateProfile({ name: displayName });
-      console.log(res);
       if (res.flag && res.data) {
         toast.success("Profile updated!", { id: toastId });
         setUser(res.data);
@@ -357,7 +356,12 @@ export default function Profile({ isUserLoged, setIsUserLoged }) {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const logoutRes = await LogoutUser({});
+    if(logoutRes.flag == false){
+      toast.error(logoutRes.data.message);
+      return;
+    }
     clearSession();
     setIsUserLoged(false);
     toast.success("Logged out successfully!");

@@ -211,4 +211,14 @@ const UpdateProfile = async (req, res) => {
     }
 }
 
-module.exports = { SendOtp, CreateUser, SetUser, UpdateUserPassword, GetUserData, UpdateProfile };
+const LogoutUser = async (req,res) => {
+    try{
+        const { jwtoken } = req.cookies;
+        await Token.deleteOne({token:jwtoken});
+        return res.status(200).json({message:"user logout!"});
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Internal server error", error: err });
+    }
+}
+module.exports = { SendOtp, CreateUser, SetUser, UpdateUserPassword, GetUserData, UpdateProfile, LogoutUser };

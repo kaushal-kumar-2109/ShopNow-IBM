@@ -74,4 +74,10 @@ const apiDeleteDevice = async (data) => {
     return await PostDataCall(ROUTERS.PUT_ROUTE.deleteDevice, data);
 }
 
-export { sendOtp, createUser, setUser, updateUserPassword, postComment, apiAddToCart, apiUpdateCartQuantity, apiRemoveFromCart, apiClearCart, apiToggleWishlist, apiUpdateProfile, apiAddAddress, apiUpdateAddress, apiDeleteAddress, apiPlaceOrder, apiCancelOrder, apiUpdateOrder, apiDeleteDevice };
+const LogoutUser = async (data) => {
+    return await PostDataCall(ROUTERS.PUT_ROUTE.logoutUser,data);
+}
+export { 
+    sendOtp, createUser, setUser, updateUserPassword, postComment, apiAddToCart, apiUpdateCartQuantity, 
+    apiRemoveFromCart, apiClearCart, apiToggleWishlist, apiUpdateProfile, apiAddAddress, apiUpdateAddress, 
+    apiDeleteAddress, apiPlaceOrder, apiCancelOrder, apiUpdateOrder, apiDeleteDevice, LogoutUser };
