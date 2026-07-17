@@ -36,7 +36,12 @@ const CheckDeviceAuth = async (req, res, next) => {
             return res.status(404).json({ tag: "user", message: "User not found!, Please enter correct email" });
         }
 
-        if (!deviceToken || deviceToken === undefined || deviceToken === null || deviceToken === "undefined" || deviceToken === "null" || deviceToken === "") {
+        let device_data = null;
+        if(deviceToken){
+            device_data = await Device.findOne({deviceToken});
+        }
+        
+        if (!device_data || device_data === undefined || device_data === null || device_data === "undefined" || device_data === "null" || device_data === "") {
             const deviceDataRes = await Device.find({ userId: userDataRes._id });
             let isDeviceMatch = false;
 
@@ -57,32 +62,15 @@ const CheckDeviceAuth = async (req, res, next) => {
                 });
             }
 
+            console.log(isDeviceMatch);
             if (!isDeviceMatch || isDeviceMatch == false || deviceDataRes.length <= 0 || !deviceDataRes) {
                 SendOTP(email || null);
             }
 
-            // const deviceTokenRes = await CreateDeviceToken(deviceRes);
-            // const isLocal = process.env.WEB == "local";
-
-            // res.cookie("deviceToken", deviceTokenRes.token, {
-            //     httpOnly: true,
-            //     secure: !isLocal,
-            //     sameSite: isLocal ? "lax" : "none",
-            // });
-            // let dd = {
-            //     userId: userDataRes._id,
-            //     architecture: deviceRes.architecture || "unknown",
-            //     hardwareConcurrency: deviceRes.hardwareConcurrency || 0,
-            //     deviceMemory: deviceRes.deviceMemory || 0,
-            //     screenResolution: resolutionString,
-            //     timezone: deviceRes.timezone || "unknown",
-            //     platform: deviceRes.platform || "unknown",
-            //     deviceToken: deviceTokenRes.token,
-            //     deviceUserToken: "NA"
-            // };
-            // req.deviceTokenData = dd;
             return next();
         }
+
+
 
         return next();
 

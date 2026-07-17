@@ -240,6 +240,16 @@ const LogoutUser = async (req,res) => {
     try{
         const { jwtoken } = req.cookies;
         await Token.deleteOne({token:jwtoken});
+        res.clearCookie("jwtoken", { 
+            httpOnly: true, 
+            secure: (process.env.WEB === "local") ? false : true,
+            sameSite: (process.env.WEB === "local") ? "lax" : "none",
+        });
+        res.clearCookie("deviceToken", { 
+            httpOnly: true, 
+            secure: (process.env.WEB === "local") ? false : true,
+            sameSite: (process.env.WEB === "local") ? "lax" : "none",
+        });
         return res.status(200).json({message:"user logout!"});
     } catch (err) {
         console.error(err);
