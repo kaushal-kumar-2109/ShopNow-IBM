@@ -69,7 +69,7 @@ const CheckDeviceAuth = async (req, res, next) => {
                 secure: !isLocal,
                 sameSite: isLocal ? "lax" : "none",
             });
-            await Device.create({
+            req.deviceTokenData = {
                 userId: userDataRes._id,
                 architecture: deviceRes.architecture || "unknown",
                 hardwareConcurrency: deviceRes.hardwareConcurrency || 0,
@@ -78,8 +78,8 @@ const CheckDeviceAuth = async (req, res, next) => {
                 timezone: deviceRes.timezone || "unknown",
                 platform: deviceRes.platform || "unknown",
                 deviceToken: deviceTokenRes.token,
-                deviceUserToken: jwtoken
-            });
+                deviceUserToken: "NA"
+            }
             return next();
         }
 

@@ -26,6 +26,8 @@ const DeleteDevice = async (req, res) => {
 
         const checkDevice = await Device.findOne({ _id: deviceId });
         if (!checkDevice) return res.status(404).json({ tag: "device", message: "Device not found!" });
+        console.log(checkDevice);
+        return res.status(500).json({message:"under woek"});
 
         await Token.deleteOne({ token: checkDevice.deviceUserToken });
         await Device.deleteOne({ _id: deviceId });
